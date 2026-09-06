@@ -1,0 +1,6128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>HOUSE FILE · GAME 2 — 전세사기를 피해라!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Mono:wght@500;700&display=swap');
+
+:root{
+  --cream:#FFF7EA; --paper:#FFFFFF; --ink:#241F2B; --soft:#5B5566;
+  --money:#1E9E5A; --money-dark:#127A43; --danger:#FF4B4B; --danger-dark:#C2222B;
+  --warn:#FFB100; --accent:#6E5DF2; --accent-dark:#4A3BC4; --accent-soft:#EFEBFF;
+  --blue:#2C78C8; --blue-soft:#EFF6FF; --line:#E9E1D2;
+  --shadow:0 6px 0 rgba(36,31,43,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--cream);
+  background-image:
+    radial-gradient(circle at 10% 10%,#FFF1DA 0,transparent 45%),
+    radial-gradient(circle at 90% 85%,#F1ECFF 0,transparent 40%);
+  color:var(--ink); font-family:'Gowun Dodum',sans-serif;
+  min-height:100vh; display:flex; justify-content:center;
+}
+button,input{font:inherit;color:inherit}
+button{touch-action:manipulation}
+
+#app{
+  width:100%;
+  max-width:540px;
+  min-height:100vh;
+  background:var(--paper);
+  box-shadow:0 0 60px rgba(36,31,43,.08);
+  position:relative;
+  overflow:hidden;
+}
+
+#hud{
+  position:sticky;
+  top:0;
+  z-index:60;
+  background:var(--ink);
+  color:#fff;
+  padding:9px 14px 10px;
+  border-bottom:4px solid var(--warn);
+}
+
+.hud1{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:10px;
+}
+
+.stagechip{
+  font-size:11px;
+  color:#ffe9b0;
+  opacity:.9;
+  flex:1;
+}
+
+.moneyhud{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:700;
+  font-size:19px;
+  color:#7CFFB2;
+  white-space:nowrap;
+}
+
+.hud2{
+  display:flex;
+  gap:6px;
+  margin-top:6px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.pill{
+  background:rgba(255,255,255,.08);
+  border-radius:999px;
+  padding:3px 8px;
+  font-size:10.5px;
+}
+
+.hbtn{
+  border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.09);
+  color:#fff;
+  border-radius:8px;
+  padding:5px 8px;
+  font-size:10.5px;
+  cursor:pointer;
+}
+
+.hbtn:disabled{
+  opacity:.28;
+  cursor:not-allowed;
+}
+
+#stage{
+  padding:22px 20px 48px;
+  min-height:calc(100vh - 82px);
+  animation:sceneIn .34s ease;
+}
+
+@keyframes sceneIn{
+  from{
+    opacity:0;
+    transform:translateY(8px) scale(.99);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--accent);
+  font-weight:700;
+  letter-spacing:.02em;
+}
+
+h1{
+  font-family:'Gaegu',cursive;
+  font-size:28px;
+  margin:4px 0 6px;
+  line-height:1.18;
+}
+
+h2{
+  font-family:'Gaegu',cursive;
+}
+
+.sub{
+  color:var(--soft);
+  font-size:13.5px;
+  margin:0 0 16px;
+  line-height:1.55;
+}
+
+.body{
+  font-size:15px;
+  line-height:1.75;
+  margin:10px 0;
+}
+
+.tiny{
+  font-size:11.5px;
+  color:var(--soft);
+  line-height:1.6;
+}
+
+.hero{
+  text-align:center;
+  padding:12px 0;
+}
+
+.hero .emoji{
+  font-size:54px;
+}
+
+.panel{
+  border:2px solid var(--line);
+  border-radius:15px;
+  padding:13px;
+  margin:12px 0;
+  background:#fff;
+}
+
+.panel.dark{
+  background:var(--ink);
+  color:#fff;
+  border-color:var(--ink);
+}
+
+.panel.warn{
+  background:#FFF3D6;
+  border-color:var(--warn);
+}
+
+.panel.bad{
+  background:#FFF0F0;
+  border-color:#f0b6ba;
+}
+
+.panel.good{
+  background:#EAF8EF;
+  border-color:#bfe7cf;
+}
+
+.panel.blue{
+  background:var(--blue-soft);
+  border-color:#c9def5;
+}
+
+.moneycard{
+  background:var(--ink);
+  color:#fff;
+  border-radius:16px;
+  padding:15px 17px;
+  margin:14px 0;
+}
+
+.moneycard .label{
+  font-size:11px;
+  opacity:.72;
+}
+
+.moneycard .amt{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:25px;
+  font-weight:700;
+  margin-top:2px;
+}
+
+.moneycard.loss{
+  background:#35181b;
+}
+
+.moneycard.loss .amt{
+  color:#ff8d94;
+}
+
+.moneycard.gain .amt{
+  color:#84f4b1;
+}
+
+.narrator{
+  border-left:4px solid var(--accent);
+  background:var(--accent-soft);
+  border-radius:10px;
+  padding:11px 13px;
+  margin:13px 0;
+  font-size:14px;
+  line-height:1.65;
+}
+
+.narrator.bad{
+  border-color:var(--danger);
+  background:#FFF0F0;
+}
+
+.narrator.good{
+  border-color:var(--money);
+  background:#EAF8EF;
+}
+
+.npc{
+  display:flex;
+  gap:9px;
+  margin:13px 0;
+}
+
+.avatar{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  background:var(--warn);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  flex:none;
+}
+
+.bubble{
+  border:2px solid var(--line);
+  background:#FAF6EC;
+  border-radius:14px 14px 14px 3px;
+  padding:10px 13px;
+  font-size:14px;
+  line-height:1.6;
+}
+
+.choices{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:15px;
+}
+
+.choice{
+  border:2px solid var(--ink);
+  background:#fff;
+  border-radius:14px;
+  padding:13px 14px;
+  text-align:left;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  font-size:14.5px;
+}
+
+.choice:active{
+  transform:translateY(3px);
+  box-shadow:none;
+}
+
+.choice.done{
+  border-color:var(--money);
+  background:#F3FBF6;
+  box-shadow:none;
+}
+
+.choice small{
+  display:block;
+  color:var(--soft);
+  font-size:11.5px;
+  line-height:1.5;
+  margin-top:4px;
+}
+
+.primary{
+  width:100%;
+  border:none;
+  border-radius:14px;
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+  padding:14px 16px;
+  font-size:15px;
+  box-shadow:0 6px 0 var(--accent-dark);
+  margin-top:16px;
+  cursor:pointer;
+}
+
+.primary:disabled{
+  background:#CFC9DA;
+  box-shadow:0 6px 0 #B4ADC4;
+  cursor:not-allowed;
+}
+
+.primary:active:not(:disabled){
+  transform:translateY(3px);
+  box-shadow:none;
+}
+
+.ghost{
+  width:100%;
+  border:2px dashed var(--accent);
+  background:#fff;
+  color:var(--accent);
+  font-weight:700;
+  border-radius:14px;
+  padding:11px 13px;
+  margin-top:9px;
+  cursor:pointer;
+}
+
+.stat{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 1px;
+  border-bottom:1px dashed var(--line);
+  font-size:13.5px;
+}
+
+.stat:last-child{
+  border-bottom:none;
+}
+
+.stat b{
+  font-family:'IBM Plex Mono',monospace;
+  text-align:right;
+}
+
+.tag{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  background:var(--ink);
+  color:#fff;
+  border-radius:6px;
+  padding:1px 6px;
+  margin-right:8px;
+}
+
+.castgrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.cast{
+  border:2px solid var(--line);
+  border-radius:15px;
+  padding:13px;
+  background:#fff;
+}
+
+.cast .face{
+  font-size:34px;
+}
+
+.cast h3{
+  margin:4px 0;
+  font-size:15px;
+}
+
+.cast p{
+  font-size:11.5px;
+  color:var(--soft);
+  line-height:1.55;
+  margin:0;
+}
+
+.docgrid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.doc{
+  border:2px solid var(--line);
+  background:#fff;
+  border-radius:13px;
+  padding:11px;
+  text-align:left;
+  cursor:pointer;
+  min-height:80px;
+}
+
+.doc.done{
+  border-color:var(--money);
+  background:#F3FBF6;
+}
+
+.doc b{
+  display:block;
+  font-size:13px;
+}
+
+.doc span{
+  font-size:11px;
+  color:var(--soft);
+  line-height:1.4;
+}
+
+.flagrow{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+}
+
+.flag,
+.safe{
+  font-size:10px;
+  border-radius:999px;
+  padding:4px 7px;
+}
+
+.flag{
+  background:#FFF0F0;
+  color:#a72830;
+}
+
+.safe{
+  background:#EAF8EF;
+  color:#176940;
+}
+
+.private{
+  background:#17132c;
+  color:#fff;
+  border-radius:18px;
+  padding:20px;
+  margin:12px 0;
+}
+
+.private h2{
+  font-size:23px;
+  color:#c6bbff;
+  margin:4px 0;
+}
+
+.private p{
+  font-size:13px;
+  line-height:1.7;
+  color:#e4def1;
+}
+
+.passscreen{
+  background:#17132c;
+  color:#fff;
+  border-radius:18px;
+  padding:30px 18px;
+  text-align:center;
+}
+
+.timer{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:700;
+  font-size:34px;
+  text-align:center;
+  color:var(--accent);
+  margin:12px 0;
+}
+
+.shieldrow{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin:14px 0;
+}
+
+.shield{
+  border:2px dashed #cabfd6;
+  border-radius:13px;
+  padding:11px 5px;
+  text-align:center;
+  font-size:11px;
+  color:var(--soft);
+  min-height:76px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.shield .ico{
+  font-size:23px;
+}
+
+.shield.on{
+  border-style:solid;
+  border-color:var(--money);
+  background:#F3FBF6;
+  color:var(--ink);
+}
+
+.shield.locked{
+  border-style:solid;
+  border-color:var(--accent);
+  background:var(--accent-soft);
+  color:var(--ink);
+}
+
+.law{
+  border:2px solid #cae0f7;
+  background:#f2f8ff;
+  border-radius:14px;
+  padding:11px 12px;
+  margin:12px 0;
+}
+
+.law b{
+  color:#2364a3;
+  font-size:12.5px;
+}
+
+.law div{
+  font-size:11.5px;
+  color:#45596c;
+  line-height:1.62;
+  margin-top:4px;
+}
+
+.order{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+  border:2px solid var(--line);
+  border-radius:13px;
+  padding:10px;
+  margin:8px 0;
+}
+
+.order b{
+  display:block;
+  font-size:13px;
+}
+
+.order span{
+  font-size:11px;
+  color:var(--soft);
+  line-height:1.45;
+}
+
+.arrows{
+  display:flex;
+  gap:4px;
+}
+
+.arrow{
+  width:32px;
+  height:32px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fff;
+  cursor:pointer;
+  font-weight:700;
+}
+
+.pot{
+  background:var(--ink);
+  color:#fff;
+  border-radius:16px;
+  padding:14px;
+  text-align:center;
+  margin:12px 0;
+}
+
+.pot .big{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:700;
+  font-size:27px;
+  color:#86f4b3;
+}
+
+.claim{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  margin:7px 0;
+}
+
+.claim.paid{
+  border-color:var(--money);
+  background:#F3FBF6;
+}
+
+.claim.zero{
+  border-color:#bbb;
+  background:#f7f7f7;
+}
+
+.claim b{
+  font-size:13px;
+}
+
+.claim span{
+  display:block;
+  font-size:11px;
+  color:var(--soft);
+  margin-top:3px;
+  line-height:1.45;
+}
+
+.paybtn{
+  border:none;
+  background:var(--ink);
+  color:#fff;
+  border-radius:8px;
+  padding:8px 10px;
+  font-size:11px;
+  cursor:pointer;
+}
+
+.paybtn:disabled{
+  opacity:.35;
+}
+
+.checkrow{
+  display:flex;
+  gap:9px;
+  align-items:flex-start;
+  border:2px solid var(--line);
+  border-radius:12px;
+  padding:10px;
+  margin:7px 0;
+  background:#fff;
+}
+
+.checkrow input{
+  margin-top:3px;
+  transform:scale(1.2);
+}
+
+.checkrow b{
+  display:block;
+  font-size:12.5px;
+}
+
+.checkrow span{
+  font-size:11.5px;
+  color:var(--soft);
+  line-height:1.5;
+}
+
+.evidence{
+  border:2px solid var(--line);
+  border-radius:13px;
+  padding:10px;
+  margin:7px 0;
+}
+
+.evidence b{
+  font-size:12.5px;
+}
+
+.evbtns{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-top:7px;
+}
+
+.evbtn{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:8px;
+  padding:7px;
+  font-size:11px;
+  cursor:pointer;
+}
+
+.evbtn.on{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+  color:#4b3cba;
+  font-weight:700;
+}
+
+.conceptbox{
+  border:2px solid var(--warn);
+  background:#FFF6DA;
+  border-radius:14px;
+  padding:12px 14px;
+  margin:16px 0;
+  font-size:12.5px;
+  line-height:1.8;
+}
+
+.calcbox{
+  border:2px solid var(--ink);
+  border-radius:15px;
+  padding:14px;
+  background:#fff;
+  margin:12px 0;
+}
+
+.calcbox input{
+  width:100%;
+  border:2px solid var(--line);
+  border-radius:11px;
+  padding:12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:18px;
+  margin-top:9px;
+}
+
+.calcbox input:focus{
+  outline:none;
+  border-color:var(--accent);
+}
+
+.progress{
+  height:12px;
+  background:#eee7da;
+  border-radius:999px;
+  overflow:hidden;
+  margin:10px 0;
+}
+
+.progress>div{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--money));
+  transition:width .35s;
+}
+
+.badend{
+  background:#1b1420;
+  color:#fff;
+  margin:-22px -20px -48px;
+  padding:38px 22px;
+  min-height:calc(100vh - 82px);
+  text-align:center;
+}
+
+.badend .skull{
+  font-size:48px;
+}
+
+.badend h1{
+  color:#ff727a;
+}
+
+.badend p{
+  text-align:left;
+  font-size:13.5px;
+  line-height:1.72;
+}
+
+.retry{
+  width:100%;
+  border:none;
+  border-radius:14px;
+  background:#ff727a;
+  color:#1b1420;
+  font-weight:700;
+  padding:14px;
+  margin-top:16px;
+  cursor:pointer;
+}
+
+.parallel{
+  background:#15112b;
+  color:#fff;
+  border-radius:18px;
+  padding:20px;
+  margin:12px 0;
+}
+
+.parallel h2{
+  font-size:24px;
+  color:#c6bbff;
+  margin:3px 0;
+}
+
+.parallel p{
+  font-size:13px;
+  line-height:1.7;
+  color:#e4def1;
+}
+
+.clear{
+  text-align:center;
+}
+
+.cup{
+  font-size:56px;
+}
+
+#restartFab{
+  position:fixed;
+  bottom:16px;
+  right:calc(50% - 270px + 16px);
+  z-index:80;
+  background:var(--ink);
+  color:#fff;
+  border:none;
+  border-radius:999px;
+  width:42px;
+  height:42px;
+  font-size:16px;
+  cursor:pointer;
+  opacity:.35;
+}
+
+/* EVENT BREAK */
+
+.eventBreak{
+  min-height:64vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+  padding:24px 4px;
+  position:relative;
+}
+
+.eventBreak::before{
+  content:'';
+  position:absolute;
+  inset:-22px -20px -48px;
+  z-index:-1;
+  background:radial-gradient(circle at center,#fff 0,#fff 42%,#f8f4ec 100%);
+}
+
+.eventBreak.danger::before{
+  background:radial-gradient(circle at center,#fff 0,#fff 38%,#ffe7e7 100%);
+}
+
+.eventBreak.good::before{
+  background:radial-gradient(circle at center,#fff 0,#fff 38%,#e5f8ec 100%);
+}
+
+.eventBreak.notice::before{
+  background:radial-gradient(circle at center,#fff 0,#fff 38%,#eeeaff 100%);
+}
+
+.eventTime{
+  display:inline-block;
+  align-self:center;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11.5px;
+  font-weight:700;
+  color:var(--soft);
+  background:#f4f0e8;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:7px 12px;
+  margin-bottom:18px;
+}
+
+.eventIcon{
+  font-size:58px;
+  line-height:1;
+  animation:eventDrop .55s cubic-bezier(.2,.9,.25,1.25);
+}
+
+.eventLabel{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.1em;
+  color:var(--danger);
+  margin-top:12px;
+}
+
+.eventBreak.good .eventLabel{
+  color:var(--money-dark);
+}
+
+.eventBreak.notice .eventLabel{
+  color:var(--accent);
+}
+
+.eventTitle{
+  font-family:'Gaegu',cursive;
+  font-size:35px;
+  margin:6px 0 9px;
+  line-height:1.1;
+}
+
+.eventMessage{
+  border:2px solid var(--line);
+  background:rgba(255,255,255,.92);
+  border-radius:15px;
+  padding:13px 14px;
+  font-size:13.5px;
+  line-height:1.68;
+  margin:8px 0;
+  box-shadow:var(--shadow);
+}
+
+.eventQuestion{
+  font-family:'Gaegu',cursive;
+  font-size:20px;
+  line-height:1.35;
+  margin:15px 4px 2px;
+}
+
+.eventBreak.danger .eventQuestion{
+  color:var(--danger-dark);
+}
+
+.eventBreak.good .eventQuestion{
+  color:var(--money-dark);
+}
+
+.eventBreak.notice .eventQuestion{
+  color:var(--accent-dark);
+}
+
+.eventBadge{
+  display:inline-block;
+  align-self:center;
+  margin-top:8px;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:10.5px;
+  font-weight:700;
+  background:#fff;
+  border:1px solid var(--line);
+}
+
+.eventAlert{
+  margin:11px 0 2px;
+  border:2px solid var(--danger);
+  background:#fff;
+  border-radius:15px;
+  padding:11px 13px;
+  text-align:left;
+  animation:eventPulse .8s ease;
+}
+
+.eventAlert.good{
+  border-color:var(--money);
+}
+
+.eventAlert .source{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;
+  font-weight:700;
+  color:var(--soft);
+  margin-bottom:5px;
+}
+
+.eventAlert b{
+  font-size:14px;
+}
+
+@keyframes eventDrop{
+  0%{
+    opacity:0;
+    transform:translateY(-35px) scale(.55);
+  }
+  65%{
+    opacity:1;
+    transform:translateY(5px) scale(1.14);
+  }
+  100%{
+    transform:none;
+  }
+}
+
+@keyframes eventPulse{
+  0%{
+    transform:scale(.94);
+    opacity:.2;
+  }
+  45%{
+    transform:scale(1.025);
+    opacity:1;
+  }
+  100%{
+    transform:scale(1);
+  }
+}
+
+/* EFFECTS */
+
+.scrim{
+  position:fixed;
+  inset:0;
+  background:rgba(20,16,28,.55);
+  z-index:220;
+  animation:fade .18s ease;
+}
+
+.popup{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(.76);
+  width:min(88vw,430px);
+  background:#fff;
+  border:3px solid var(--ink);
+  border-radius:20px;
+  padding:18px;
+  z-index:230;
+  box-shadow:0 18px 0 rgba(36,31,43,.18);
+  animation:popupIn .28s cubic-bezier(.18,.8,.32,1.3) forwards;
+}
+
+.popup .icon{
+  font-size:42px;
+  text-align:center;
+}
+
+.popup h2{
+  font-size:25px;
+  margin:3px 0 8px;
+  text-align:center;
+}
+
+.popup button{
+  width:100%;
+  margin-top:14px;
+  border:none;
+  border-radius:12px;
+  padding:12px;
+  background:var(--accent);
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.shake{
+  animation:shake .38s ease;
+}
+
+.flashBad{
+  animation:flashBad .55s ease;
+}
+
+.flashGood{
+  animation:flashGood .55s ease;
+}
+
+.zoomHit{
+  animation:zoomHit .6s ease;
+}
+
+.pulse{
+  animation:pulse .75s ease;
+}
+
+.moneyFloat{
+  position:fixed;
+  left:50%;
+  top:41%;
+  z-index:245;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:30px;
+  font-weight:700;
+  color:#ff5964;
+  text-shadow:0 2px 0 #fff;
+  pointer-events:none;
+  animation:moneyFly 1.05s ease forwards;
+}
+
+.unlockBurst{
+  position:fixed;
+  left:50%;
+  top:46%;
+  z-index:250;
+  font-size:56px;
+  pointer-events:none;
+  animation:unlockBurst .8s ease forwards;
+}
+
+.rewindFx{
+  position:fixed;
+  inset:0;
+  z-index:270;
+  background:radial-gradient(circle,#2b2356,#0f0d1d);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  animation:rewindScreen 1.05s ease forwards;
+  pointer-events:none;
+}
+
+.rewindFx .icon{
+  font-size:64px;
+  animation:spinBack .75s linear infinite;
+}
+
+.rewindFx b{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:22px;
+  color:#d1c8ff;
+  margin-top:10px;
+}
+
+.confetti{
+  position:fixed;
+  top:-16px;
+  width:9px;
+  height:15px;
+  border-radius:3px;
+  z-index:260;
+  animation:fall 1.8s linear forwards;
+}
+
+@keyframes fade{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+@keyframes popupIn{
+  to{
+    transform:translate(-50%,-50%) scale(1);
+  }
+}
+
+@keyframes shake{
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(7px)}
+  60%{transform:translateX(-5px)}
+  80%{transform:translateX(3px)}
+  100%{transform:translateX(0)}
+}
+
+@keyframes flashBad{
+  0%{box-shadow:inset 0 0 0 999px rgba(255,60,70,.18)}
+  100%{box-shadow:inset 0 0 0 0 rgba(255,60,70,0)}
+}
+
+@keyframes flashGood{
+  0%{box-shadow:inset 0 0 0 999px rgba(40,200,100,.15)}
+  100%{box-shadow:inset 0 0 0 0 rgba(40,200,100,0)}
+}
+
+@keyframes zoomHit{
+  0%{transform:scale(1)}
+  45%{transform:scale(1.045)}
+  100%{transform:scale(1)}
+}
+
+@keyframes pulse{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.1)}
+  100%{transform:scale(1)}
+}
+
+@keyframes moneyFly{
+  0%{
+    opacity:0;
+    transform:translate(-50%,20px) scale(.7);
+  }
+  20%{
+    opacity:1;
+    transform:translate(-50%,0) scale(1.15);
+  }
+  100%{
+    opacity:0;
+    transform:translate(-50%,-95px) scale(.95);
+  }
+}
+
+@keyframes unlockBurst{
+  0%{
+    opacity:0;
+    transform:translate(-50%,-50%) scale(.25);
+  }
+  45%{
+    opacity:1;
+    transform:translate(-50%,-50%) scale(1.45);
+  }
+  100%{
+    opacity:0;
+    transform:translate(-50%,-50%) scale(.9);
+  }
+}
+
+@keyframes rewindScreen{
+  0%{
+    opacity:0;
+    filter:hue-rotate(0);
+  }
+  18%{opacity:1}
+  72%{
+    opacity:1;
+    filter:hue-rotate(120deg);
+  }
+  100%{
+    opacity:0;
+    filter:hue-rotate(240deg);
+  }
+}
+
+@keyframes spinBack{
+  to{
+    transform:rotate(-360deg);
+  }
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(110vh) rotate(720deg);
+  }
+}
+
+@media(max-width:560px){
+  #restartFab{right:16px}
+}
+
+@media(max-width:460px){
+  #stage{
+    padding-left:14px;
+    padding-right:14px;
+  }
+
+  .badend{
+    margin-left:-14px;
+    margin-right:-14px;
+  }
+
+  .castgrid,
+  .docgrid{
+    grid-template-columns:1fr;
+  }
+
+  h1{
+    font-size:26px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+  <header id="hud"></header>
+  <main id="stage"></main>
+</div>
+
+<button id="restartFab" title="교사용 초기화">↺</button>
+
+<script>
+'use strict';
+
+const STORE='HOUSE_FILE_GAME2_FINAL_V2';
+const HIST='HOUSE_FILE_GAME2_FINAL_V2_H';
+const LEGAL_AS_OF='2026.09';
+
+const C={
+  deposit:150000000,
+
+  risky:{
+    value:520000000,
+    mortgageMax:160000000,
+    existingDeposits:230000000,
+    owner:'김민수',
+    agent:'박현우'
+  },
+
+  safe:{
+    value:320000000,
+    priorBankClaim:100000000,
+    owner:'이서준',
+    address:'해솔아파트 302호'
+  },
+
+  auction:{
+    sale:270000000,
+    cost:20000000,
+    bankA:100000000,
+    player:150000000,
+    bankB:150000000
+  },
+
+  raiseBase:150000000,
+  raiseCap:7500000,
+  raiseTotal:157500000
+};
+
+const BAD={
+  BE01:{
+    title:'RED FLAG를 다 찾고도 계약했습니다',
+    loss:30000000,
+    checkpoint:'riskChoice',
+    story:'위험 신호를 여러 개 확인하고도 거래구조를 바꾸지 않은 채 위험매물을 강행했습니다. 이 실패세계에서는 이후 경매에서 보증금 3천만 원을 회수하지 못합니다. 손실액은 수업용 사건 설정값입니다.'
+  },
+
+  BE02:{
+    title:'전입신고를 미뤘습니다',
+    loss:150000000,
+    checkpoint:'movein',
+    story:'주택에는 입주했지만 주민등록을 마치지 않은 사이 소유자가 바뀌었습니다. 새 소유자에게 임대차의 효력을 주장할 대항요건을 갖추지 못했고, 이 게임에서는 종전 임대인이 무자력이 되어 보증금 전액이 위험에 노출됩니다.'
+  },
+
+  BE03:{
+    title:'확정일자를 받지 않았습니다',
+    loss:150000000,
+    checkpoint:'confirmedChoice',
+    story:'인도와 주민등록은 갖췄지만 확정일자가 없어 이 사건의 경매에서 후순위 담보권자인 B은행보다 우선하여 보증금을 받을 지위를 갖추지 못했습니다. 학습용 사건에서는 담보권자들의 배당 후 남는 돈이 없어 PLAYER의 회수액이 0원이 됩니다.'
+  },
+
+  BE04:{
+    title:'“제가 살 겁니다” 한마디에 권리를 포기했습니다',
+    loss:12000000,
+    checkpoint:'ownerUse',
+    story:'임대인의 실제 거주 주장만 듣고 객관적인 사정을 확인하지 않은 채 갱신요구를 포기했습니다. 실제 거주 의사의 존재는 여러 사정을 종합해 판단하며, 그 사유의 증명책임은 임대인에게 있습니다.'
+  },
+
+  BE05:{
+    title:'신청과 등기 완료를 같은 말로 생각했습니다',
+    loss:150000000,
+    checkpoint:'moveout',
+    story:'보증금을 반환받지 못한 상태에서 임차권등기명령을 신청만 하고 실제 임차권등기가 완료되기 전에 이사·전출했습니다. 핵심은 신청 자체가 아니라 임차권등기의 완료 여부를 확인하는 것입니다.'
+  }
+};
+
+const DEF={
+  scene:'cast',
+  checkpoint:'cast',
+
+  pairA:'jian',
+  solo:false,
+
+  concepts:[],
+  badEnds:[],
+  lossLedger:{},
+  reincarnations:0,
+  activeBad:null,
+
+  docs:{
+    market:false,
+    registry:false,
+    leases:false,
+    tax:false,
+    party:false
+  },
+
+  activeDoc:null,
+  feedback:'',
+  flags:[],
+  safeSignals:[],
+
+  combinePicked:null,
+
+  conditions:[],
+  conditionResultSeen:false,
+
+  registered:false,
+  opposition:false,
+  noRegLessonSeen:false,
+
+  fixed:false,
+  priority:false,
+  noFixedLessonSeen:false,
+
+  failMode:null,
+  failPot:0,
+  failStep:0,
+  failPaid:{},
+
+  auctionOrder:[
+    'player',
+    'bankB',
+    'bankA'
+  ],
+
+  auctionPot:0,
+  auctionPaid:{},
+  auctionIndex:0,
+
+  ownerInvestigating:false,
+  ownerEvidence:{},
+
+  leaseRegStep:0,
+  moveoutFound:false,
+
+  protected:0
+};
+
+let S=load();
+let H=loadH();
+
+function clone(x){
+  return JSON.parse(JSON.stringify(x));
+}
+
+function deepMerge(base,extra){
+  const out=clone(base);
+
+  Object.keys(extra||{}).forEach(k=>{
+    if(
+      extra[k] &&
+      typeof extra[k]==='object' &&
+      !Array.isArray(extra[k]) &&
+      out[k] &&
+      typeof out[k]==='object' &&
+      !Array.isArray(out[k])
+    ){
+      out[k]=deepMerge(out[k],extra[k]);
+    }else{
+      out[k]=extra[k];
+    }
+  });
+
+  return out;
+}
+
+function load(){
+  try{
+    const r=JSON.parse(localStorage.getItem(STORE)||'null');
+    return r ? deepMerge(DEF,r) : clone(DEF);
+  }catch(e){
+    return clone(DEF);
+  }
+}
+
+function loadH(){
+  try{
+    const r=JSON.parse(localStorage.getItem(HIST)||'[]');
+    return Array.isArray(r) ? r : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function save(){
+  localStorage.setItem(STORE,JSON.stringify(S));
+  localStorage.setItem(HIST,JSON.stringify(H));
+}
+
+function money(n){
+  return '₩'+Math.round(n||0).toLocaleString('ko-KR');
+}
+
+function unlockSilent(name){
+  if(!S.concepts.includes(name)){
+    S.concepts.push(name);
+  }
+}
+
+function setCP(id){
+  S.checkpoint=id;
+}
+
+function snap(){
+  H.push(clone(S));
+
+  if(H.length>55){
+    H.shift();
+  }
+}
+
+function go(id,mut,opt){
+  opt=opt||{};
+
+  if(!opt.skip){
+    snap();
+  }
+
+  if(mut){
+    mut();
+  }
+
+  S.scene=id;
+  save();
+  render();
+  window.scrollTo(0,0);
+}
+
+function back(){
+  if(!H.length){
+    return;
+  }
+
+  S=H.pop();
+  save();
+  render();
+  window.scrollTo(0,0);
+}
+
+function resetAll(){
+  if(!confirm('GAME 2 진행 상황을 모두 초기화할까요?')){
+    return;
+  }
+
+  localStorage.removeItem(STORE);
+  localStorage.removeItem(HIST);
+
+  S=clone(DEF);
+  H=[];
+
+  render();
+}
+
+document.getElementById('restartFab').onclick=resetAll;
+
+function recordBad(code){
+  if(!S.badEnds.includes(code)){
+    S.badEnds.push(code);
+    S.lossLedger[code]=BAD[code].loss;
+  }
+}
+
+function vibrate(ms){
+  try{
+    if(navigator.vibrate){
+      navigator.vibrate(ms||40);
+    }
+  }catch(e){}
+}
+
+function fx(kind){
+  const a=document.getElementById('app');
+
+  a.classList.remove(
+    'shake',
+    'flashBad',
+    'flashGood',
+    'zoomHit'
+  );
+
+  void a.offsetWidth;
+
+  if(kind==='bad'){
+    a.classList.add(
+      'shake',
+      'flashBad'
+    );
+
+    vibrate(80);
+  }
+
+  if(kind==='good'){
+    a.classList.add(
+      'flashGood',
+      'zoomHit'
+    );
+  }
+}
+
+function moneyFx(n,label){
+  const d=document.createElement('div');
+
+  d.className='moneyFloat';
+
+  d.textContent=
+    (label||'-')+
+    money(n);
+
+  document.body.appendChild(d);
+
+  setTimeout(
+    ()=>d.remove(),
+    1150
+  );
+}
+
+function confettiBurst(){
+  for(let i=0;i<32;i++){
+    const d=document.createElement('div');
+
+    d.className='confetti';
+
+    d.style.left=
+      Math.random()*100+'vw';
+
+    d.style.background=[
+      '#6E5DF2',
+      '#FFB100',
+      '#1E9E5A',
+      '#FF4B4B'
+    ][i%4];
+
+    d.style.animationDelay=
+      (Math.random()*.45)+'s';
+
+    document.body.appendChild(d);
+
+    setTimeout(
+      ()=>d.remove(),
+      2300
+    );
+  }
+}
+
+function popup(icon,title,body,cb,label){
+  const scr=document.createElement('div');
+
+  scr.className='scrim';
+
+  const p=document.createElement('div');
+
+  p.className='popup';
+
+  p.innerHTML=`
+    <div class="icon">
+      ${icon}
+    </div>
+
+    <h2>
+      ${title}
+    </h2>
+
+    <div style="font-size:13.5px;line-height:1.72;">
+      ${body}
+    </div>
+
+    <button>
+      ${label||'확인'}
+    </button>
+  `;
+
+  document.body.append(scr,p);
+
+  p.querySelector('button').onclick=()=>{
+    scr.remove();
+    p.remove();
+
+    if(cb){
+      cb();
+    }
+  };
+}
+
+function concept(name,desc,cb,mode){
+  unlockSilent(name);
+  save();
+
+  const b=document.createElement('div');
+
+  b.className='unlockBurst';
+
+  b.textContent=
+    mode==='master'
+      ? '🏅'
+      : '🔓';
+
+  document.body.appendChild(b);
+
+  setTimeout(
+    ()=>b.remove(),
+    850
+  );
+
+  popup(
+    mode==='master'
+      ? '🏅'
+      : '📚',
+
+    mode==='master'
+      ? `${name} · MASTERED`
+      : name,
+
+    desc,
+    cb
+  );
+}
+
+function rewindTo(scene,mut){
+  const r=document.createElement('div');
+
+  r.className='rewindFx';
+
+  r.innerHTML=`
+    <div class="icon">
+      ⏪
+    </div>
+
+    <b>
+      TIME REWIND
+    </b>
+  `;
+
+  document.body.appendChild(r);
+
+  setTimeout(()=>{
+    if(mut){
+      mut();
+    }
+
+    S.scene=scene;
+    H=[];
+
+    save();
+    render();
+
+    window.scrollTo(0,0);
+  },600);
+
+  setTimeout(
+    ()=>r.remove(),
+    1100
+  );
+}
+
+function bad(code){
+  recordBad(code);
+
+  S.activeBad=code;
+
+  setCP(
+    BAD[code].checkpoint
+  );
+
+  save();
+
+  fx('bad');
+
+  moneyFx(
+    BAD[code].loss
+  );
+
+  setTimeout(
+    ()=>go(
+      'badend',
+      null,
+      {skip:true}
+    ),
+    220
+  );
+}
+
+function reincarnate(){
+  S.reincarnations++;
+
+  S.scene=
+    S.checkpoint;
+
+  S.activeBad=null;
+
+  H=[];
+
+  save();
+  render();
+
+  window.scrollTo(0,0);
+}
+
+function renderHUD(){
+  const h=document.getElementById('hud');
+
+  h.innerHTML=`
+    <div class="hud1">
+
+      <span class="stagechip">
+        📍 GAME 2 · 전세사기를 피해라!
+      </span>
+
+      <span class="moneyhud">
+        ${money(C.deposit)}
+      </span>
+
+    </div>
+
+    <div class="hud2">
+
+      <span class="pill">
+        🚩 ${S.flags.length}
+      </span>
+
+      <span class="pill">
+        📚 ${S.concepts.length}
+      </span>
+
+      <span class="pill">
+        ☠ ${S.badEnds.length}
+      </span>
+
+      <span class="pill">
+        ♻ ${S.reincarnations}
+      </span>
+
+      <button
+        class="hbtn"
+        id="hb"
+        ${H.length?'':'disabled'}
+      >
+        ◀ 이전
+      </button>
+
+      <button
+        class="hbtn"
+        id="hs"
+      >
+        💾 저장
+      </button>
+
+    </div>
+  `;
+
+  h.querySelector('#hb').onclick=
+    back;
+
+  h.querySelector('#hs').onclick=e=>{
+    save();
+
+    const b=e.target;
+    const t=b.textContent;
+
+    b.textContent='✅ 저장됨';
+
+    setTimeout(
+      ()=>b.textContent=t,
+      850
+    );
+  };
+}
+
+function head(code,title,sub){
+  return `
+    <div class="eyebrow">
+      ${code}
+    </div>
+
+    <h1>
+      ${title}
+    </h1>
+
+    ${
+      sub
+      ?
+      `<p class="sub">${sub}</p>`
+      :
+      ''
+    }
+  `;
+}
+
+function npc(e,t){
+  return `
+    <div class="npc">
+
+      <div class="avatar">
+        ${e}
+      </div>
+
+      <div class="bubble">
+        ${t}
+      </div>
+
+    </div>
+  `;
+}
+
+function law(title,text){
+  return `
+    <div class="law">
+
+      <b>
+        ⚖ ${title}
+      </b>
+
+      <div>
+        ${text}
+      </div>
+
+    </div>
+  `;
+}
+
+function bind(el,fn){
+  el.querySelectorAll('.choice')
+  .forEach(b=>{
+    b.onclick=()=>
+      fn(
+        b.dataset.v,
+        b
+      );
+  });
+}
+
+function retry(el,msg,scene){
+  fx('bad');
+
+  el.innerHTML=`
+    <div class="narrator bad">
+      ${msg}
+    </div>
+
+    <button
+      class="primary"
+      id="r"
+    >
+      다시 판단하기
+    </button>
+  `;
+
+  el.querySelector('#r').onclick=()=>
+    go(
+      scene,
+      null,
+      {skip:true}
+    );
+}
+
+function eventBreak(el,opt){
+  opt=opt||{};
+
+  const mode=
+    opt.mode||'notice';
+
+  if(mode==='danger'){
+    fx('bad');
+  }
+
+  if(mode==='good'){
+    fx('good');
+  }
+
+  el.innerHTML=`
+    <div class="eventBreak ${mode}">
+
+      ${
+        opt.time
+        ?
+        `<div class="eventTime">
+          ⏩ ${opt.time}
+        </div>`
+        :
+        ''
+      }
+
+      <div class="eventIcon">
+        ${opt.icon||'🚨'}
+      </div>
+
+      <div class="eventLabel">
+        ${opt.label||'NEW EVENT'}
+      </div>
+
+      <div class="eventTitle">
+        ${opt.title||'새로운 사건 발생'}
+      </div>
+
+      ${
+        opt.alert
+        ?
+        `<div class="eventAlert ${
+          mode==='good'
+          ? 'good'
+          : ''
+        }">
+          ${opt.alert}
+        </div>`
+        :
+        ''
+      }
+
+      ${
+        opt.message
+        ?
+        `<div class="eventMessage">
+          ${opt.message}
+        </div>`
+        :
+        ''
+      }
+
+      ${
+        opt.question
+        ?
+        `<div class="eventQuestion">
+          ${opt.question}
+        </div>`
+        :
+        ''
+      }
+
+      ${
+        opt.badge
+        ?
+        `<div class="eventBadge">
+          ${opt.badge}
+        </div>`
+        :
+        ''
+      }
+
+      <button
+        class="primary"
+        id="eventNext"
+      >
+        ${opt.button||'상황 확인하기'}
+      </button>
+
+    </div>
+  `;
+
+  el.querySelector('#eventNext').onclick=()=>{
+    if(
+      typeof opt.onNext==='function'
+    ){
+      opt.onNext();
+    }
+    else if(opt.next){
+      go(opt.next);
+    }
+  };
+}
+
+function pairName(ch){
+  const a=
+    S.pairA==='jian'
+    ? 'jian'
+    : 'doyoon';
+
+  return ch===a
+    ? 'PLAYER A'
+    : 'PLAYER B';
+}
+
+const SC={};
+
+/* CAST */
+
+SC.cast=el=>{
+  el.innerHTML=`
+    <div class="hero">
+
+      <div class="emoji">
+        💍
+      </div>
+
+      <div class="eyebrow">
+        HOUSE FILE · CASE 02
+      </div>
+
+      <h1>
+        OUR FIRST HOME
+      </h1>
+
+      <p class="sub">
+        신혼부부 2인 협동 ·
+        보증금 1억 5천만 원을 지켜라
+      </p>
+
+    </div>
+
+    <div class="castgrid">
+
+      <div class="cast">
+
+        <div class="face">
+          👩
+        </div>
+
+        <h3>
+          지안
+        </h3>
+
+        <p>
+          숫자·문서를 끝까지 보는 편.
+          <b>약점:</b>
+          확인하다 결정이 늦어질 때가 있음.
+        </p>
+
+      </div>
+
+      <div class="cast">
+
+        <div class="face">
+          👨
+        </div>
+
+        <h3>
+          도윤
+        </h3>
+
+        <p>
+          현장정보·대화·협상에 강함.
+          <b>약점:</b>
+          친절한 상대를 조금 쉽게 믿는 편.
+        </p>
+
+      </div>
+
+    </div>
+
+    <p class="tiny">
+      성별 고정 역할이 아니라
+      사건 속 캐릭터 성향입니다.
+      짝이 없으면 혼자 플레이해도 됩니다.
+    </p>
+
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="jian"
+      >
+        2인 · PLAYER A = 지안
+        · PLAYER B = 도윤
+      </button>
+
+      <button
+        class="choice"
+        data-v="doyoon"
+      >
+        2인 · PLAYER A = 도윤
+        · PLAYER B = 지안
+      </button>
+
+      <button
+        class="choice"
+        data-v="solo"
+      >
+        혼자 플레이
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>go(
+      'intro',
+      ()=>{
+        S.pairA=
+          v==='doyoon'
+          ? 'doyoon'
+          : 'jian';
+
+        S.solo=
+          v==='solo';
+
+        setCP('intro');
+      }
+    )
+  );
+};
+
+/* INTRO */
+
+SC.intro=el=>{
+  el.innerHTML=`
+    <div class="hero">
+
+      <div class="emoji">
+        🚨
+      </div>
+
+      <h1>
+        전세사기를 피해라!
+      </h1>
+
+      <p class="sub">
+        SAVE MY DEPOSIT
+      </p>
+
+    </div>
+
+    <div class="moneycard gain">
+
+      <div class="label">
+        반드시 지켜야 할 보증금
+      </div>
+
+      <div class="amt">
+        ${money(C.deposit)}
+      </div>
+
+    </div>
+
+    <p class="body">
+      결혼 3개월 차.
+      목표는 예쁜 집을 고르는 것이 아닙니다.
+
+      <b>
+        계약이 끝나는 날
+        보증금 1억 5천만 원을
+        전액 들고 나오는 것
+      </b>
+      입니다.
+    </p>
+
+    <p class="tiny">
+      ⚠ 이 게임의 RED FLAG는
+      형사상 사기 확정표시가 아니라,
+      보증금 미회수 위험을
+      더 확인해야 한다는 신호입니다.
+    </p>
+
+    <button
+      class="primary"
+      id="go"
+    >
+      신혼집 보러 가기
+    </button>
+  `;
+
+  el.querySelector('#go').onclick=
+    ()=>go(
+      'listing',
+      ()=>setCP('listing')
+    );
+};
+
+/* LISTING */
+
+SC.listing=el=>{
+  el.innerHTML=
+    head(
+      'ACT 1',
+      'THE LISTING',
+      '광고 문구만 보고 안전한 집을 고를 수 있을까요?'
+    )
+    +
+    `
+    <div class="choices">
+
+      <button class="choice">
+        <span class="tag">A</span>
+        전세 1억 4,500 · “융자 없음”
+      </button>
+
+      <button class="choice">
+        <span class="tag">B</span>
+        전세 1억 5천 · 신축
+        · “오늘 계약하면 이사비 지원”
+      </button>
+
+      <button class="choice">
+        <span class="tag">C</span>
+        전세 1억 5천 · “안심매물”
+      </button>
+
+    </div>
+
+    <p class="tiny">
+      어느 매물을 눌러도
+      이번 사건의 B 매물 —
+      해솔하우스 조사실로 이어집니다.
+    </p>
+  `;
+
+  el.querySelectorAll('.choice')
+  .forEach(b=>{
+    b.onclick=()=>
+      go(
+        'investigate',
+        ()=>setCP('investigate')
+      );
+  });
+};
+
+/* RED FLAG HUNT */
+
+const DOCS={
+  registry:{
+    icon:'📜',
+    title:'등기부',
+    body:`
+      <b>【갑구】</b>
+      소유자: ${C.risky.owner}
+      <br>
+      <b>【을구】</b>
+      근저당권 · 채권최고액
+      <b>${money(C.risky.mortgageMax)}</b>
+    `,
+    q:'이 정보의 핵심 의미는?',
+    opts:[
+      [
+        'right',
+        '선순위 담보권이 존재하며 채권최고액은 위험을 살필 중요한 정보다'
+      ],
+      [
+        'wrong',
+        '은행의 실제 대출잔액이 정확히 1억 6천만 원이라는 뜻이다'
+      ]
+    ],
+    correct:'right',
+    flag:
+      `선순위 근저당 채권최고액 ${money(C.risky.mortgageMax)}`
+  },
+
+  market:{
+    icon:'🏠',
+    title:'시세',
+    body:`
+      이 건물은 <b>다가구주택</b>입니다.
+      <br>
+      건물 전체 예상가치
+      <b>${money(C.risky.value)}</b>
+      <br>
+      우리 보증금
+      <b>${money(C.deposit)}</b>
+    `,
+    q:'다음으로 할 일은?',
+    opts:[
+      [
+        'right',
+        '다른 임차보증금과 선순위 담보까지 확인해 회수여력을 함께 본다'
+      ],
+      [
+        'wrong',
+        '신축이고 시세가 있으니 안전하다고 결론낸다'
+      ]
+    ],
+    correct:'right',
+    flag:
+      '주택가치와 권리부담을 함께 비교해야 함'
+  },
+
+  leases:{
+    icon:'👥',
+    title:'기존 임대차',
+    body:
+      '201호 8,000만 · 301호 7,000만 · 401호 8,000만',
+    q:'확인된 다른 임차보증금의 합계는?',
+    opts:[
+      ['150','1억 5천만 원'],
+      ['230','2억 3천만 원'],
+      ['280','2억 8천만 원']
+    ],
+    correct:'230',
+    flag:
+      '기존 임차보증금 합계 2억 3천만'
+  },
+
+  tax:{
+    icon:'🧾',
+    title:'세금·임대차 정보',
+    body:
+      '임대인이 국세·지방세 납세증명서와 해당 주택의 기존 확정일자·차임·보증금 관련 정보를 제시했습니다. 이 사건에서는 체납 없음.',
+    q:'왜 이런 정보를 확인할까?',
+    opts:[
+      [
+        'right',
+        '계약 전 보증금 회수와 관련된 위험정보를 확인하기 위해'
+      ],
+      [
+        'wrong',
+        '집주인의 소비성향을 평가하기 위해'
+      ]
+    ],
+    correct:'right',
+    safe:
+      '체납 없음 · 정보 제시 확인'
+  },
+
+  party:{
+    icon:'🪪',
+    title:'계약 상대방',
+    body:`
+      등기부 소유자:
+      <b>${C.risky.owner}</b>
+      <br>
+      계약하러 나온 사람:
+      <b>${C.risky.agent}</b>
+      <br>
+      “집주인 동생이라 제가 대신 왔어요.”
+    `,
+    q:'다음 행동은?',
+    opts:[
+      [
+        'right',
+        '소유자 본인 또는 적법한 대리권을 확인한다'
+      ],
+      [
+        'wrong',
+        '가족이라고 하니 그냥 믿는다'
+      ]
+    ],
+    correct:'right',
+    flag:
+      '소유자·계약상대방 불일치'
+  }
+};
+
+SC.investigate=el=>{
+  const done=
+    Object.values(S.docs)
+    .filter(Boolean)
+    .length;
+
+  const active=
+    S.activeDoc &&
+    DOCS[S.activeDoc];
+
+  el.innerHTML=
+    head(
+      'ACT 1',
+      'RED FLAG HUNT',
+      '다섯 개 사건파일을 원하는 순서로 조사하세요.'
+    )
+    +
+    `
+    <div class="panel">
+
+      <div class="stat">
+        <span>조사 완료</span>
+        <b>${done}/5</b>
+      </div>
+
+      <div class="flagrow">
+
+        ${S.flags.map(x=>`
+          <span class="flag">
+            🚩 ${x}
+          </span>
+        `).join('')}
+
+        ${S.safeSignals.map(x=>`
+          <span class="safe">
+            ✓ ${x}
+          </span>
+        `).join('')}
+
+      </div>
+
+    </div>
+
+    <div class="docgrid">
+
+      ${Object.entries(DOCS).map(([k,d])=>`
+        <button
+          class="doc ${S.docs[k]?'done':''}"
+          data-doc="${k}"
+        >
+          <b>
+            ${d.icon}
+            ${d.title}
+            ${S.docs[k]?'✓':''}
+          </b>
+
+          <span>
+            ${
+              S.docs[k]
+              ? '조사 완료'
+              : '열어보기'
+            }
+          </span>
+        </button>
+      `).join('')}
+
+    </div>
+
+    ${
+      active
+      ?
+      `
+      <div class="panel blue">
+
+        <b>
+          ${active.icon}
+          ${active.title}
+        </b>
+
+        <p
+          class="body"
+          style="font-size:14px"
+        >
+          ${active.body}
+        </p>
+
+        <div class="narrator">
+          ${active.q}
+        </div>
+
+        <div class="choices">
+
+          ${active.opts.map(o=>`
+            <button
+              class="choice"
+              data-ans="${o[0]}"
+            >
+              ${o[1]}
+            </button>
+          `).join('')}
+
+        </div>
+
+        ${
+          S.feedback
+          ?
+          `
+          <div
+            class="narrator ${
+              S.feedback.startsWith('✅')
+              ? 'good'
+              : 'bad'
+            }"
+          >
+            ${S.feedback}
+          </div>
+          `
+          :
+          ''
+        }
+
+      </div>
+      `
+      :
+      ''
+    }
+
+    ${
+      done===5
+      ?
+      `
+      <div class="panel warn">
+
+        <div class="stat">
+          <span>주택 예상가치</span>
+          <b>${money(C.risky.value)}</b>
+        </div>
+
+        <div class="stat">
+          <span>근저당 채권최고액</span>
+          <b>${money(C.risky.mortgageMax)}</b>
+        </div>
+
+        <div class="stat">
+          <span>확인된 기존 임차보증금</span>
+          <b>${money(C.risky.existingDeposits)}</b>
+        </div>
+
+        <div class="stat">
+          <span>우리 보증금</span>
+          <b>${money(C.deposit)}</b>
+        </div>
+
+        <div class="stat">
+          <span>단순 합계</span>
+          <b>
+            ${
+              money(
+                C.risky.mortgageMax+
+                C.risky.existingDeposits+
+                C.deposit
+              )
+            }
+          </b>
+        </div>
+
+        <p class="tiny">
+          ※ 위험 스크리닝용 단순 비교입니다.
+          채권최고액은 실제 채무액과
+          같다고 단정할 수 없고,
+          기존 임차인의 정확한 법적 순위도
+          각자의 대항요건·확정일자 등을
+          추가 확인해야 합니다.
+        </p>
+
+      </div>
+
+      <button
+        class="primary"
+        id="next"
+      >
+        💍 COUPLE SECRET EVENT
+      </button>
+      `
+      :
+      ''
+    }
+  `;
+
+  el.querySelectorAll(
+    '[data-doc]'
+  ).forEach(b=>{
+    b.onclick=()=>{
+      S.activeDoc=
+        b.dataset.doc;
+
+      S.feedback='';
+
+      save();
+      render();
+    };
+  });
+
+  el.querySelectorAll(
+    '[data-ans]'
+  ).forEach(b=>{
+    b.onclick=()=>{
+      const k=
+        S.activeDoc;
+
+      const d=
+        DOCS[k];
+
+      if(
+        b.dataset.ans===
+        d.correct
+      ){
+        S.docs[k]=true;
+
+        if(
+          d.flag &&
+          !S.flags.includes(d.flag)
+        ){
+          S.flags.push(d.flag);
+        }
+
+        if(
+          d.safe &&
+          !S.safeSignals.includes(d.safe)
+        ){
+          S.safeSignals.push(d.safe);
+        }
+
+        S.feedback=
+          '✅ 핵심을 정확히 찾았습니다.';
+
+        fx('good');
+
+        if(k==='party'){
+          unlockSilent(
+            'CASE 01 RECALL: 갑구 소유자·대리권 확인'
+          );
+        }
+      }
+      else{
+        S.feedback=
+          '❌ 다시 파일의 숫자와 권리관계를 보세요.';
+
+        fx('bad');
+      }
+
+      save();
+      render();
+    };
+  });
+
+  const n=
+    el.querySelector('#next');
+
+  if(n){
+    n.onclick=()=>
+      go(
+        'privateJ',
+        ()=>{
+          S.activeDoc=null;
+          S.feedback='';
+          setCP('privateJ');
+        }
+      );
+  }
+};
+
+/* COUPLE EVENT */
+
+SC.privateJ=el=>{
+  el.innerHTML=
+    head(
+      'COUPLE SECRET',
+      '🤫 지안만 화면을 보세요',
+      S.solo
+      ? '혼자 플레이: 이 화면을 먼저 읽고 기억하세요.'
+      : `${pairName('jian')} · 도윤 역할 학생은 잠깐 화면을 보지 않습니다.`
+    )
+    +
+    `
+    <div class="private">
+
+      <h2>
+        숫자가 이상합니다
+      </h2>
+
+      <p>
+        주택 예상가치
+        ${money(C.risky.value)}
+        <br>
+
+        근저당 채권최고액
+        ${money(C.risky.mortgageMax)}
+        <br>
+
+        기존 임차보증금
+        ${money(C.risky.existingDeposits)}
+        <br>
+
+        우리 보증금
+        ${money(C.deposit)}
+      </p>
+
+      <p>
+        <b>지안 미션:</b>
+        왜 이 거래가 위험해 보이는지
+        한 문장으로 기억하세요.
+
+        다음 화면에서는 이 정보가 사라집니다.
+      </p>
+
+    </div>
+
+    <button
+      class="primary"
+      id="pass"
+    >
+      📱 화면 가리기 → 도윤에게 넘기기
+    </button>
+  `;
+
+  el.querySelector('#pass').onclick=
+    ()=>go('pass');
+};
+
+SC.pass=el=>{
+  el.innerHTML=`
+    <div class="passscreen">
+
+      <div style="font-size:52px">
+        🙈
+      </div>
+
+      <h1 style="color:white">
+        PLAYER CHANGE
+      </h1>
+
+      <p>
+        ${
+          S.solo
+          ?
+          '첫 번째 비밀정보가 닫혔습니다. 이제 두 번째 화면을 읽으세요.'
+          :
+          '지안의 비밀정보가 닫혔습니다. 도윤 역할 학생에게 휴대폰을 넘기세요.'
+        }
+      </p>
+
+    </div>
+
+    <button
+      class="primary"
+      id="show"
+    >
+      도윤의 비밀정보 열기
+    </button>
+  `;
+
+  el.querySelector('#show').onclick=
+    ()=>go('privateD');
+};
+
+SC.privateD=el=>{
+  el.innerHTML=
+    head(
+      'COUPLE SECRET',
+      '🤫 도윤만 화면을 보세요',
+      S.solo
+      ? '혼자 플레이: 이어서 읽으세요.'
+      : `${pairName('doyoon')} · 지안 역할 학생은 잠깐 화면을 보지 않습니다.`
+    )
+    +
+    `
+    <div class="private">
+
+      <h2>
+        현장에서 들은 말이 엇갈립니다
+      </h2>
+
+      <p>
+        중개사:
+        “근저당은 잔금날 없앨 거예요.”
+        <br><br>
+
+        집주인 통화:
+        “대출은 당장 갚을 생각 없는데요?”
+        <br><br>
+
+        기존 임차인:
+        “저도 보증금 정산 얘기가 아직 확실하지 않아요.”
+      </p>
+
+      <p>
+        <b>도윤 미션:</b>
+        이 모순되는 현장정보를
+        지안에게 설명하세요.
+      </p>
+
+    </div>
+
+    <button
+      class="primary"
+      id="meet"
+    >
+      둘이 다시 같이 보기
+    </button>
+  `;
+
+  el.querySelector('#meet').onclick=
+    ()=>go('meeting');
+};
+
+SC.meeting=el=>{
+  el.innerHTML=
+    head(
+      'COUPLE EVENT',
+      '💍 긴급 신혼부부 회의',
+      '두 사람이 본 정보가 서로 다릅니다.'
+    )
+    +
+    `
+    <div class="panel warn">
+
+      <b>
+        30초 동안 서로 설명하세요.
+      </b>
+
+      <p class="tiny">
+        지안 = 숫자·권리부담
+        /
+        도윤 = 중개사·집주인·기존 임차인의 모순
+      </p>
+
+    </div>
+
+    <div
+      class="timer"
+      id="timer"
+    >
+      00:30
+    </div>
+
+    <button
+      class="primary"
+      id="done"
+    >
+      회의 끝 — COMBINE CLUE
+    </button>
+  `;
+
+  let t=30;
+
+  const box=
+    el.querySelector('#timer');
+
+  const iv=
+    setInterval(()=>{
+      if(
+        !document.body.contains(box)
+      ){
+        clearInterval(iv);
+        return;
+      }
+
+      t--;
+
+      box.textContent=
+        t>0
+        ? '00:'+String(t).padStart(2,'0')
+        : '회의 종료!';
+
+      if(t<=0){
+        clearInterval(iv);
+      }
+    },1000);
+
+  el.querySelector('#done').onclick=()=>{
+    clearInterval(iv);
+    go('combine');
+  };
+};
+
+SC.combine=el=>{
+  el.innerHTML=
+    head(
+      'COUPLE SYNERGY',
+      '두 정보를 합치면?',
+      '서로 설명했다면 한 사람의 화면만 봤을 때보다 더 정확한 결론을 낼 수 있습니다.'
+    )
+    +
+    `
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="a"
+      >
+        신축이므로 가격이 오를 가능성이 높다
+      </button>
+
+      <button
+        class="choice"
+        data-v="b"
+      >
+        숫자상 회수여력이 불안한데,
+        위험을 없애겠다는 설명마저 서로 모순된다
+      </button>
+
+      <button
+        class="choice"
+        data-v="c"
+      >
+        이사비 지원이 있으므로
+        위험이 어느 정도 상쇄된다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+      if(v==='b'){
+        concept(
+          'COUPLE SYNERGY +1',
+          '한 사람은 숫자, 다른 사람은 현장 모순을 발견했습니다. 계약 전 위험판단은 여러 정보를 결합할수록 강해집니다.',
+          ()=>go(
+            'riskChoice',
+            ()=>setCP('riskChoice')
+          )
+        );
+      }
+      else{
+        retry(
+          el,
+          '❌ 두 사람이 서로에게 전달한 정보를 함께 사용해야 합니다.',
+          'combine'
+        );
+      }
+    }
+  );
+};
+
+/* BOSS 1 */
+
+SC.riskChoice=el=>{
+  el.innerHTML=
+    head(
+      'BOSS 1',
+      '이 위험매물을 계약할까?',
+      '위험을 발견한 것과 위험을 없앤 것은 다릅니다.'
+    )
+    +
+    `
+    <div class="panel bad">
+
+      ${S.flags.map(x=>`
+        <div class="stat">
+
+          <span>
+            🚩 ${x}
+          </span>
+
+          <b>
+            CHECK
+          </b>
+
+        </div>
+      `).join('')}
+
+    </div>
+
+    ${npc(
+      '🧑‍💼',
+      '오늘 계약하면 이사비 300만 원 지원해드릴게요.'
+    )}
+
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="sign"
+      >
+        그대로 계약한다
+      </button>
+
+      <button
+        class="choice"
+        data-v="fix"
+      >
+        위험을 제거하는 조건으로
+        계약을 다시 설계한다
+      </button>
+
+      <button
+        class="choice"
+        data-v="switch"
+      >
+        이 매물은 포기하고
+        다른 집을 찾는다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+      if(v==='sign'){
+        bad('BE01');
+      }
+      else if(v==='fix'){
+        go(
+          'riskFix',
+          ()=>setCP('riskFix')
+        );
+      }
+      else{
+        go(
+          'newListing',
+          ()=>unlockSilent(
+            '거래하지 않는 것도 위험관리의 선택'
+          )
+        );
+      }
+    }
+  );
+};
+
+SC.riskFix=el=>{
+  const req=[
+    'mortgage',
+    'leases',
+    'authority'
+  ];
+
+  el.innerHTML=
+    head(
+      'BOSS 1',
+      '위험 제거 조건을 설계하라',
+      '생활조건보다 보증금 회수와 직접 관련된 조건부터 고르세요.'
+    )
+    +
+    `
+    <label class="checkrow">
+
+      <input
+        type="checkbox"
+        value="mortgage"
+        ${
+          S.conditions.includes('mortgage')
+          ? 'checked'
+          : ''
+        }
+      >
+
+      <div>
+
+        <b>
+          근저당 말소를 잔금 지급 조건으로 하고
+          실제 말소를 확인
+        </b>
+
+        <span>
+          특약을 적는 것과 실제 말소 완료는 다릅니다.
+        </span>
+
+      </div>
+
+    </label>
+
+    <label class="checkrow">
+
+      <input
+        type="checkbox"
+        value="leases"
+        ${
+          S.conditions.includes('leases')
+          ? 'checked'
+          : ''
+        }
+      >
+
+      <div>
+
+        <b>
+          기존 임차보증금 정리 사실과
+          새로운 임대차 변동을 재확인
+        </b>
+
+        <span>
+          다가구의 다른 임차보증금은
+          회수여력과 연결됩니다.
+        </span>
+
+      </div>
+
+    </label>
+
+    <label class="checkrow">
+
+      <input
+        type="checkbox"
+        value="authority"
+        ${
+          S.conditions.includes('authority')
+          ? 'checked'
+          : ''
+        }
+      >
+
+      <div>
+
+        <b>
+          소유자 본인 또는
+          적법한 대리권 확인
+        </b>
+
+        <span>
+          가족이라는 말만으로
+          대리권이 생기는 것은 아닙니다.
+        </span>
+
+      </div>
+
+    </label>
+
+    <label class="checkrow">
+
+      <input
+        type="checkbox"
+        value="wall"
+        ${
+          S.conditions.includes('wall')
+          ? 'checked'
+          : ''
+        }
+      >
+
+      <div>
+
+        <b>
+          벽지 교체 요청
+        </b>
+
+        <span>
+          생활에는 중요하지만
+          지금의 핵심 권리위험을 없애지는 못합니다.
+        </span>
+
+      </div>
+
+    </label>
+
+    <div id="msg"></div>
+
+    <button
+      class="primary"
+      id="send"
+    >
+      조건 제시하기
+    </button>
+  `;
+
+  el.querySelectorAll(
+    'input[type=checkbox]'
+  ).forEach(c=>{
+    c.onchange=()=>{
+      if(c.checked){
+        if(
+          !S.conditions.includes(c.value)
+        ){
+          S.conditions.push(c.value);
+        }
+      }
+      else{
+        S.conditions=
+          S.conditions.filter(
+            x=>x!==c.value
+          );
+      }
+
+      save();
+    };
+  });
+
+  el.querySelector('#send').onclick=()=>{
+    if(
+      req.some(
+        x=>!S.conditions.includes(x)
+      )
+    ){
+      el.querySelector('#msg').innerHTML=`
+        <div class="narrator bad">
+          ❌ 핵심 위험요소가 남아 있습니다.
+          권리관계부터 해결하세요.
+        </div>
+      `;
+
+      fx('bad');
+      return;
+    }
+
+    go(
+      'conditionRefused',
+      ()=>{
+        S.conditionResultSeen=true;
+
+        unlockSilent(
+          '특약만으로 위험이 자동 제거되지는 않음'
+        );
+      }
+    );
+  };
+};
+
+SC.conditionRefused=el=>{
+  fx('bad');
+
+  el.innerHTML=
+    head(
+      'CONDITIONS NOT SATISFIED',
+      '조건을 제시했지만…',
+      '위험을 없애는 조건에 상대방이 동의한다고 해서 실제 이행까지 자동 보장되는 것도 아닙니다.'
+    )
+    +
+    `
+    ${npc(
+      '🧑‍💼',
+      '근저당은 지금 못 없애는데요. 기존 세입자 보증금은 새 세입자 돈 들어오면 주면 되고요.'
+    )}
+
+    <div class="panel bad">
+
+      <b>
+        🚨 거래구조 개선 실패
+      </b>
+
+      <p class="tiny">
+        위험요소를 실제로 해소할 수 없는 거래라면
+        계약을 하지 않는 선택이 필요합니다.
+      </p>
+
+    </div>
+
+    <button
+      class="primary"
+      id="leave"
+    >
+      이 매물은 포기한다
+    </button>
+  `;
+
+  el.querySelector('#leave').onclick=
+    ()=>go('newListing');
+};
+
+/* NEW LISTING */
+
+SC.newListing=el=>{
+  el.innerHTML=
+    head(
+      'NEW LISTING UNLOCKED',
+      '🏠 해솔아파트 302호',
+      '앞의 위험매물과 다른 새 매물입니다. 이후 본편은 이 집에서 진행됩니다.'
+    )
+    +
+    `
+    <div class="panel good">
+
+      <div class="stat">
+        <span>주택 예상가치</span>
+        <b>${money(C.safe.value)}</b>
+      </div>
+
+      <div class="stat">
+        <span>기존 A은행 담보채권</span>
+        <b>${money(C.safe.priorBankClaim)}</b>
+      </div>
+
+      <div class="stat">
+        <span>기존 임차인</span>
+        <b>없음</b>
+      </div>
+
+      <div class="stat">
+        <span>우리 보증금</span>
+        <b>${money(C.deposit)}</b>
+      </div>
+
+      <div class="stat">
+        <span>소유자</span>
+        <b>${C.safe.owner} 본인 계약</b>
+      </div>
+
+    </div>
+
+    <div class="narrator">
+
+      ♻ <b>CASE 01 MEMORY</b>
+      <br>
+
+      갑구에서는 소유자,
+      을구에서는 담보권 등
+      소유권 외 부담을 확인했던 기술을
+      여기서도 다시 사용합니다.
+
+    </div>
+
+    <p class="tiny">
+      ※ 기존 A은행 담보는 남아 있습니다.
+      뒤에서 이것이 경매순위에
+      어떤 의미를 갖는지 직접 확인합니다.
+    </p>
+
+    <button
+      class="primary"
+      id="go"
+    >
+      계약 체결 → MOVE-IN DAY
+    </button>
+  `;
+
+  el.querySelector('#go').onclick=
+    ()=>go(
+      'movein',
+      ()=>setCP('movein')
+    );
+};
+
+/* 대항력 발견 */
+
+SC.movein=el=>{
+  el.innerHTML=
+    head(
+      'ACT 2',
+      'MOVE-IN DAY',
+      '아직 게임은 보호장치의 법률용어를 알려주지 않습니다.'
+    )
+    +
+    `
+    <div class="shieldrow">
+
+      <div class="shield on">
+        <div class="ico">🔑</div>
+        입주 완료
+      </div>
+
+      <div class="shield ${S.registered?'on':''}">
+        <div class="ico">📍</div>
+        ${S.registered?'전입 완료':'????'}
+      </div>
+
+      <div class="shield ${S.fixed?'on':''}">
+        <div class="ico">📅</div>
+        ${S.fixed?'확정일자':'????'}
+      </div>
+
+    </div>
+
+    <div class="narrator">
+      이사 당일 18:10.
+      짐 정리를 마쳤습니다.
+      주민센터 업무시간이 곧 끝납니다.
+    </div>
+
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="later"
+      >
+        피곤하다.
+        전입신고는 주말에 한다
+      </button>
+
+      <button
+        class="choice"
+        data-v="today"
+      >
+        오늘 전입신고까지 마친다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+      if(v==='later'){
+        go('newOwnerFailEvent');
+      }
+      else{
+        S.registered=true;
+        save();
+
+        if(!S.noRegLessonSeen){
+          go('parallelNoReg');
+        }
+        else{
+          go('registeredClock');
+        }
+      }
+    }
+  );
+};
+
+SC.parallelNoReg=el=>{
+  el.innerHTML=
+    head(
+      'PARALLEL FUTURE',
+      '🪞 좋은 선택이었습니다. 그런데 왜?',
+      '전입신고를 오늘 하지 않았던 미래를 짧게 열어봅니다.'
+    )
+    +
+    `
+    <div class="parallel">
+
+      <h2>
+        3 WEEKS LATER
+      </h2>
+
+      <p>
+        입주는 했지만 주민등록을 하지 않은 세계.
+        집이 제3자에게 매도되고
+        종전 임대인은 무자력이 됩니다.
+      </p>
+
+    </div>
+
+    <button
+      class="primary"
+      id="open"
+    >
+      그 미래를 본다
+    </button>
+  `;
+
+  el.querySelector('#open').onclick=
+    ()=>go('newOwnerParallelEvent');
+};
+
+SC.newOwnerParallelEvent=el=>{
+  eventBreak(el,{
+    mode:'danger',
+    time:'3 WEEKS LATER',
+    icon:'📱',
+    label:'PROPERTY ALERT',
+    title:'집주인이 바뀌었다',
+
+    alert:`
+      <div class="source">
+        부동산 소유권 변동 알림
+      </div>
+      <b>
+        해솔아파트 302호 · 소유권이전등기 완료
+      </b>
+    `,
+
+    message:`
+      입주한 지 3주.
+      휴대폰에 갑자기
+      <b>소유권 변동 알림</b>이 도착했습니다.
+    `,
+
+    question:
+      '“잠깐… 내가 계약한 집주인이 아닌데?”',
+
+    button:
+      '새 소유자가 누구인지 확인한다',
+
+    next:
+      'newOwnerParallel'
+  });
+};
+
+SC.newOwnerFailEvent=el=>{
+  eventBreak(el,{
+    mode:'danger',
+    time:'3 WEEKS LATER',
+    icon:'📱',
+    label:'PROPERTY ALERT',
+    title:'집주인이 바뀌었다',
+
+    alert:`
+      <div class="source">
+        부동산 소유권 변동 알림
+      </div>
+      <b>
+        해솔아파트 302호 · 소유권이전등기 완료
+      </b>
+    `,
+
+    message:`
+      입주한 지 3주.
+      휴대폰에 갑자기
+      <b>소유권 변동 알림</b>이 도착했습니다.
+    `,
+
+    question:
+      '“나는 계속 여기 살고 있었는데… 무슨 일이 생긴 거지?”',
+
+    button:
+      '상황을 확인한다',
+
+    next:
+      'newOwnerFail'
+  });
+};
+
+SC.newOwnerSuccessEvent=el=>{
+  eventBreak(el,{
+    mode:'danger',
+    time:'2 MONTHS LATER',
+    icon:'📱',
+    label:'PROPERTY ALERT · AGAIN',
+    title:'또 집주인이 바뀌었다',
+
+    alert:`
+      <div class="source">
+        부동산 소유권 변동 알림
+      </div>
+      <b>
+        해솔아파트 302호 · 새로운 소유자 등기
+      </b>
+    `,
+
+    message:`
+      전입신고를 마친 뒤 두 달.
+      <b>똑같은 소유권 변동 사건</b>이
+      다시 일어났습니다.
+    `,
+
+    question:
+      '“또 같은 공격이다. 이번에도 쫓겨나는 걸까?”',
+
+    button:
+      '새 소유자의 말을 들어본다',
+
+    next:
+      'oppositionSuccess'
+  });
+};
+
+SC.newOwnerParallel=el=>{
+  fx('bad');
+
+  el.innerHTML=
+    head(
+      'PARALLEL FUTURE',
+      'NEW OWNER DETECTED'
+    )
+    +
+    npc(
+      '🧑',
+      '제가 이 집을 샀습니다. 다음 달까지 비워주세요.'
+    )
+    +
+    `
+    <div class="panel bad">
+
+      <div class="stat">
+        <span>입주</span>
+        <b>완료</b>
+      </div>
+
+      <div class="stat">
+        <span>주민등록</span>
+        <b>미완료</b>
+      </div>
+
+      <div class="stat">
+        <span>종전 임대인 재산</span>
+        <b>거의 없음</b>
+      </div>
+
+    </div>
+
+    <div class="moneycard loss">
+
+      <div class="label">
+        PARALLEL EXPOSURE
+      </div>
+
+      <div class="amt">
+        ${money(C.deposit)} AT RISK
+      </div>
+
+    </div>
+
+    <button
+      class="primary"
+      id="why"
+    >
+      왜 실제로 살고 있는데도 버티기 어렵지?
+    </button>
+  `;
+
+  el.querySelector('#why').onclick=()=>
+    concept(
+      '대항력',
+      '주택을 인도받고 주민등록을 마친 임차인은 <b>그 다음 날부터</b> 제3자에게 임대차의 효력을 주장할 수 있습니다. 이 평행세계에서는 주민등록 요건을 갖추지 못했습니다.',
+      ()=>rewindTo(
+        'registeredClock',
+        ()=>{
+          S.noRegLessonSeen=true;
+          S.registered=true;
+        }
+      )
+    );
+};
+
+SC.newOwnerFail=el=>{
+  fx('bad');
+
+  el.innerHTML=
+    head(
+      'EVENT 01',
+      '🚨 NEW OWNER DETECTED',
+      '소유권이 실제로 다른 사람에게 넘어갔습니다.'
+    )
+    +
+    npc(
+      '🧑',
+      '제가 이 집을 샀습니다. 다음 달까지 비워주세요.'
+    )
+    +
+    `
+    <div class="panel bad">
+
+      <div class="stat">
+        <span>입주</span>
+        <b>완료</b>
+      </div>
+
+      <div class="stat">
+        <span>주민등록</span>
+        <b>미완료</b>
+      </div>
+
+      <div class="stat">
+        <span>종전 임대인 재산</span>
+        <b>거의 없음</b>
+      </div>
+
+    </div>
+
+    <div class="narrator bad">
+      <b>
+        나는 실제로 이 집에서 살고 있다.
+      </b>
+      <br>
+      그런데 새 소유자에게
+      임대차를 주장할 힘이 없습니다.
+    </div>
+
+    <button
+      class="primary"
+      id="why"
+    >
+      왜 실제로 살고 있는데도 보호되지 않았지?
+    </button>
+  `;
+
+  el.querySelector('#why').onclick=()=>
+    concept(
+      '대항력',
+      '주택을 인도받고 주민등록을 마친 임차인은 <b>그 다음 날부터</b> 제3자에게 임대차의 효력을 주장할 수 있습니다. 방금 세계에서는 주민등록 요건을 갖추지 못했습니다.',
+      ()=>{
+        S.noRegLessonSeen=true;
+        save();
+        bad('BE02');
+      }
+    );
+};
+
+SC.registeredClock=el=>{
+  el.innerHTML=
+    head(
+      'ACT 2',
+      '전입신고 완료',
+      '그런데 아직 화면에는 방어막이 켜지지 않습니다.'
+    )
+    +
+    `
+    <div class="panel">
+
+      <div class="stat">
+        <span>03.02 18:20</span>
+        <b>전입신고 완료</b>
+      </div>
+
+      <div class="stat">
+        <span>현재</span>
+        <b>03.02 18:21</b>
+      </div>
+
+    </div>
+
+    <div class="narrator">
+      신고를 마쳤다고
+      즉시 같은 효력이 생기는 걸까요?
+    </div>
+
+    <button
+      class="primary"
+      id="next"
+    >
+      자정까지 시간을 빠르게 돌린다
+    </button>
+  `;
+
+  el.querySelector('#next').onclick=
+    ()=>go('midnight');
+};
+
+SC.midnight=el=>{
+  el.innerHTML=
+    head(
+      'COUNTDOWN',
+      '다음 날 00:00까지'
+    )
+    +
+    `
+    <div
+      class="panel dark"
+      style="text-align:center;padding:28px"
+    >
+
+      <div
+        id="clock"
+        style="font:700 34px 'IBM Plex Mono'"
+      >
+        23:59:58
+      </div>
+
+    </div>
+
+    <div id="after"></div>
+  `;
+
+  const clock=
+    el.querySelector('#clock');
+
+  const after=
+    el.querySelector('#after');
+
+  const times=[
+    '23:59:59',
+    '03.03 00:00'
+  ];
+
+  let i=0;
+
+  const iv=
+    setInterval(()=>{
+      if(
+        !document.body.contains(clock)
+      ){
+        clearInterval(iv);
+        return;
+      }
+
+      clock.textContent=
+        times[i++];
+
+      if(i===times.length){
+        clearInterval(iv);
+
+        fx('good');
+
+        S.opposition=true;
+
+        save();
+
+        after.innerHTML=`
+          <div class="narrator good pulse">
+
+            <b>
+              🛡️ UNKNOWN SHIELD ACTIVATED
+            </b>
+            <br>
+
+            무언가가 바뀌었습니다.
+
+          </div>
+
+          <button
+            class="primary"
+            id="attack"
+          >
+            2개월 뒤 — 같은 공격을 받아본다
+          </button>
+        `;
+
+        after.querySelector('#attack').onclick=
+          ()=>go('newOwnerSuccessEvent');
+      }
+    },800);
+};
+
+SC.oppositionSuccess=el=>{
+  fx('good');
+
+  el.innerHTML=
+    head(
+      'EVENT RESULT',
+      '🛡️ ATTACK BLOCKED',
+      '같은 소유권 변동 사건인데 결과가 달라졌습니다.'
+    )
+    +
+    npc(
+      '🧑',
+      '제가 새 소유자인데… 이 임대차를 그냥 없던 일로 할 수는 없네요.'
+    )
+    +
+    `
+    <div class="shieldrow">
+
+      <div class="shield on">
+        <div class="ico">🔑</div>
+        입주
+      </div>
+
+      <div class="shield on">
+        <div class="ico">📍</div>
+        주민등록
+      </div>
+
+      <div class="shield">
+        <div class="ico">📅</div>
+        ?
+      </div>
+
+    </div>
+
+    <div class="narrator good">
+      <b>
+        아까는 같은 사건에서 보호받지 못했다.
+      </b>
+      <br>
+      그런데 이번에는
+      새 소유자가 임대차를 무시하지 못했습니다.
+    </div>
+
+    <button
+      class="primary"
+      id="why"
+    >
+      아까와 뭐가 달라졌지?
+    </button>
+  `;
+
+  el.querySelector('#why').onclick=()=>
+    concept(
+      '대항력',
+      '주택의 인도와 주민등록을 마치면 <b>그 다음 날부터</b> 제3자에 대하여 임대차의 효력이 생깁니다. 방금 새 소유자 공격을 막아낸 힘이 바로 대항력입니다.',
+      ()=>go(
+        'confirmedChoice',
+        ()=>setCP('confirmedChoice')
+      ),
+      'master'
+    );
+};
+
+/* 우선변제권 발견 */
+
+SC.confirmedChoice=el=>{
+  el.innerHTML=
+    head(
+      'ACT 3',
+      '주민센터 직원의 한마디',
+      '대항력으로 새 소유자에게 임대차를 주장할 수 있다는 것은 알게 됐습니다.'
+    )
+    +
+    npc(
+      '👩‍💼',
+      '계약서에 확정일자도 받아두실래요?'
+    )
+    +
+    `
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="skip"
+      >
+        전입신고 했으니 됐죠.
+        그냥 간다
+      </button>
+
+      <button
+        class="choice"
+        data-v="get"
+      >
+        무슨 차이인지 아직 모르지만
+        받아둔다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+      if(v==='skip'){
+        startFailAuction('bad');
+      }
+      else{
+        if(!S.noFixedLessonSeen){
+          startFailAuction('parallel');
+        }
+        else{
+          go(
+            'fixedReady',
+            ()=>S.fixed=true
+          );
+        }
+      }
+    }
+  );
+};
+
+function startFailAuction(mode){
+  go(
+    'auctionFailEvent',
+    ()=>{
+      S.failMode=mode;
+
+      S.failPot=
+        C.auction.sale-
+        C.auction.cost;
+
+      S.failStep=0;
+      S.failPaid={};
+    }
+  );
+}
+
+SC.auctionFailEvent=el=>{
+  eventBreak(el,{
+    mode:'danger',
+    time:'8 MONTHS LATER',
+    icon:'🔔',
+
+    label:
+      S.failMode==='parallel'
+      ? 'PARALLEL COURT NOTICE'
+      : 'COURT NOTICE',
+
+    title:
+      '우리 신혼집이 경매에 넘어갔다',
+
+    alert:`
+      <div class="source">
+        서울○○지방법원 · 전자문서
+      </div>
+      <b>
+        부동산 임의경매개시결정
+      </b>
+    `,
+
+    message:`
+      평소처럼 살고 있던 어느 날,
+      법원 전자문서가 도착했습니다.
+      <b>
+        A은행이 담보권을 실행해
+        집이 경매절차에 들어갔습니다.
+      </b>
+    `,
+
+    question:
+      '“대항력도 있는데… 내 1억 5천은 안전한 거 아니었어?”',
+
+    button:
+      '법원 배당표를 확인한다',
+
+    next:
+      'auctionFail'
+  });
+};
+
+SC.auctionFail=el=>{
+  const steps=[
+    'bankA',
+    'bankB'
+  ];
+
+  const next=
+    steps[S.failStep];
+
+  const meta={
+    bankA:{
+      name:'🏦 A은행',
+      claim:C.auction.bankA,
+      info:'근저당권 · 02.01 · 이 사건 배당채권액 1억'
+    },
+
+    bankB:{
+      name:'🏦 B은행',
+      claim:C.auction.bankB,
+      info:'저당권 · 04.01'
+    },
+
+    player:{
+      name:'💍 PLAYER',
+      claim:C.auction.player,
+      info:'입주·전입 03.02 / 대항력 03.03 / 확정일자 없음'
+    }
+  };
+
+  el.innerHTML=
+    head(
+      S.failMode==='parallel'
+      ? 'PARALLEL FUTURE'
+      : 'EVENT 02',
+
+      '⚖️ 법원 배당표',
+
+      '집이 경매에 넘어간 뒤, 실제 돈 받을 순서를 확인합니다.'
+    )
+    +
+    `
+    <div class="panel dark">
+
+      <div class="stat">
+        <span>매각대금</span>
+        <b>${money(C.auction.sale)}</b>
+      </div>
+
+      <div class="stat">
+        <span>집행비용(사건 가정)</span>
+        <b>- ${money(C.auction.cost)}</b>
+      </div>
+
+      <div class="stat">
+        <span>배당재원</span>
+        <b>
+          ${money(
+            C.auction.sale-
+            C.auction.cost
+          )}
+        </b>
+      </div>
+
+    </div>
+
+    <div class="pot">
+
+      <div
+        class="tiny"
+        style="color:#c8c0d2"
+      >
+        남은 배당재원
+      </div>
+
+      <div class="big">
+        ${money(S.failPot)}
+      </div>
+
+    </div>
+
+    ${[
+      'bankA',
+      'bankB',
+      'player'
+    ].map(id=>{
+      const m=meta[id];
+      const p=S.failPaid[id];
+
+      return `
+        <div
+          class="claim
+          ${p!==undefined?'paid':''}
+          ${
+            id==='player' &&
+            S.failStep>=2
+            ? 'zero'
+            : ''
+          }"
+        >
+
+          <div>
+
+            <b>
+              ${m.name}
+            </b>
+
+            <span>
+              ${m.info}
+              <br>
+              요구
+              ${money(m.claim)}
+
+              ${
+                p!==undefined
+                ? ' · 실제 '+money(p)
+                : ''
+              }
+            </span>
+
+          </div>
+
+          ${
+            id!=='player'
+            ?
+            `
+            <button
+              class="paybtn"
+              data-pay="${id}"
+              ${p!==undefined?'disabled':''}
+            >
+              PAY
+            </button>
+            `
+            :
+            `
+            <button
+              class="paybtn"
+              disabled
+            >
+              ${
+                S.failStep>=2
+                ? '₩0'
+                : 'WAIT'
+              }
+            </button>
+            `
+          }
+
+        </div>
+      `;
+    }).join('')}
+
+    ${
+      S.failStep>=2
+      ?
+      `
+      <div class="narrator bad pulse">
+
+        <b>
+          잠깐.
+        </b>
+        <br>
+
+        B은행은 우리보다 나중에
+        권리를 취득했는데
+        왜 PLAYER보다 먼저 돈을 받았지?
+
+      </div>
+
+      <button
+        class="primary"
+        id="why"
+      >
+        이 차이를 만든 조건을 찾는다
+      </button>
+      `
+      :
+      ''
+    }
+
+    <p class="tiny">
+      ※ 학습용 사건:
+      조세·임금채권·
+      소액임차인 최우선변제 등
+      다른 특수우선권은 없고,
+      PLAYER는 확정일자가 없어
+      주택임대차보호법 제3조의2 제2항의
+      우선변제권을 갖추지 못한 상태라고 가정합니다.
+    </p>
+
+    <div id="msg"></div>
+  `;
+
+  el.querySelectorAll(
+    '[data-pay]'
+  ).forEach(b=>{
+    b.onclick=()=>{
+      const id=
+        b.dataset.pay;
+
+      if(id!==next){
+        fx('bad');
+
+        el.querySelector('#msg').innerHTML=`
+          <div class="narrator bad">
+            🚨 아직 이 담보권자의 차례가 아닙니다.
+          </div>
+        `;
+
+        return;
+      }
+
+      const claim=
+        meta[id].claim;
+
+      const pay=
+        Math.min(
+          S.failPot,
+          claim
+        );
+
+      S.failPaid[id]=pay;
+      S.failPot-=pay;
+      S.failStep++;
+
+      save();
+
+      moneyFx(pay);
+
+      fx('bad');
+
+      render();
+    };
+  });
+
+  const w=
+    el.querySelector('#why');
+
+  if(w){
+    w.onclick=()=>
+      concept(
+        '우선변제권',
+        '대항요건을 갖추고 임대차계약증서에 <b>확정일자</b>를 갖춘 임차인은 경매·공매의 환가대금에서 후순위권리자나 그 밖의 채권자보다 우선하여 보증금을 변제받을 수 있습니다. 방금 세계의 PLAYER에게는 그 추가 요건이 없었습니다.',
+        ()=>{
+          S.noFixedLessonSeen=true;
+          save();
+
+          if(S.failMode==='bad'){
+            bad('BE03');
+          }
+          else{
+            rewindTo(
+              'fixedReady',
+              ()=>S.fixed=true
+            );
+          }
+        }
+      );
+  }
+};
+
+SC.fixedReady=el=>{
+  S.fixed=true;
+  save();
+
+  el.innerHTML=
+    head(
+      'ACT 3',
+      '📅 확정일자 완료',
+      '이번에는 세 번째 장치까지 갖췄습니다. 아직 결과는 직접 확인해야 합니다.'
+    )
+    +
+    `
+    <div class="shieldrow">
+
+      <div class="shield on">
+        <div class="ico">🔑</div>
+        입주
+      </div>
+
+      <div class="shield on">
+        <div class="ico">📍</div>
+        주민등록
+      </div>
+
+      <div class="shield on pulse">
+        <div class="ico">📅</div>
+        확정일자
+      </div>
+
+    </div>
+
+    <div class="narrator good">
+
+      <b>
+        NEW DEFENSE INSTALLED
+      </b>
+      <br>
+
+      같은 경매를 다시 돌려봅니다.
+
+    </div>
+
+    <button
+      class="primary"
+      id="go"
+    >
+      8개월 뒤로 이동
+    </button>
+  `;
+
+  el.querySelector('#go').onclick=()=>
+    go(
+      'auctionSuccessEvent',
+      ()=>{
+        S.priority=true;
+
+        S.auctionOrder=[
+          'player',
+          'bankB',
+          'bankA'
+        ];
+
+        S.auctionPot=
+          C.auction.sale-
+          C.auction.cost;
+
+        S.auctionPaid={};
+        S.auctionIndex=0;
+
+        setCP('auctionRank');
+      }
+    );
+};
+
+SC.auctionSuccessEvent=el=>{
+  eventBreak(el,{
+    mode:'danger',
+    time:'8 MONTHS LATER',
+    icon:'🔔',
+    label:'COURT NOTICE · AGAIN',
+    title:'같은 집이 다시 경매에 넘어갔다',
+
+    alert:`
+      <div class="source">
+        서울○○지방법원 · 전자문서
+      </div>
+
+      <b>
+        부동산 임의경매개시결정
+      </b>
+    `,
+
+    message:`
+      시간을 되돌려
+      확정일자까지 갖춘 세계에서도
+      <b>똑같은 경매 사건</b>이 발생했습니다.
+    `,
+
+    question:
+      '“사건은 똑같다. 이번엔 내 돈의 순서가 달라질까?”',
+
+    button:
+      'AUCTION ENGINE 진입',
+
+    next:
+      'auctionRank'
+  });
+};
+
+const AMETA={
+  bankA:{
+    name:'🏦 A은행',
+    claim:C.auction.bankA,
+    info:'근저당권 · 02.01 · 배당채권액 1억'
+  },
+
+  player:{
+    name:'💍 PLAYER',
+    claim:C.auction.player,
+    info:'대항요건 완성 03.03 + 확정일자 03.02'
+  },
+
+  bankB:{
+    name:'🏦 B은행',
+    claim:C.auction.bankB,
+    info:'저당권 · 04.01'
+  }
+};
+
+const AEXPECT=[
+  'bankA',
+  'player',
+  'bankB'
+];
+
+SC.auctionRank=el=>{
+  const o=
+    S.auctionOrder;
+
+  el.innerHTML=
+    head(
+      'BOSS 2',
+      'AUCTION ENGINE — 돈 받을 줄을 세워라',
+      '같은 집, 같은 경매, 같은 세 권리입니다. 이번엔 PLAYER에게 확정일자가 있습니다.'
+    )
+    +
+    `
+    <div class="panel dark">
+
+      <div class="stat">
+        <span>매각대금</span>
+        <b>${money(C.auction.sale)}</b>
+      </div>
+
+      <div class="stat">
+        <span>집행비용</span>
+        <b>- ${money(C.auction.cost)}</b>
+      </div>
+
+      <div class="stat">
+        <span>배당재원</span>
+        <b>
+          ${
+            money(
+              C.auction.sale-
+              C.auction.cost
+            )
+          }
+        </b>
+      </div>
+
+    </div>
+
+    ${o.map((id,i)=>`
+      <div class="order">
+
+        <div>
+
+          <b>
+            ${i+1}.
+            ${AMETA[id].name}
+          </b>
+
+          <span>
+            ${AMETA[id].info}
+            · 요구
+            ${money(AMETA[id].claim)}
+          </span>
+
+        </div>
+
+        <div class="arrows">
+
+          <button
+            class="arrow"
+            data-u="${i}"
+          >
+            ↑
+          </button>
+
+          <button
+            class="arrow"
+            data-d="${i}"
+          >
+            ↓
+          </button>
+
+        </div>
+
+      </div>
+    `).join('')}
+
+    <label class="checkrow">
+
+      <input
+        type="checkbox"
+        id="agree"
+      >
+
+      <div>
+
+        <b>
+          🤝 두 사람이 배당순위에 합의했습니다
+        </b>
+
+        <span>
+          혼자 플레이 중이면
+          스스로 최종 검토 후 체크하세요.
+        </span>
+
+      </div>
+
+    </label>
+
+    <button
+      class="primary"
+      id="check"
+      disabled
+    >
+      순위 확정
+    </button>
+
+    <div id="msg"></div>
+
+    <p class="tiny">
+      ※ 동일하게 조세·임금·
+      소액임차인 최우선변제 등은 없는
+      학습용 사건입니다.
+    </p>
+  `;
+
+  function mv(i,d){
+    const j=
+      i+d;
+
+    if(
+      j<0 ||
+      j>=o.length
+    ){
+      return;
+    }
+
+    [
+      o[i],
+      o[j]
+    ]=[
+      o[j],
+      o[i]
+    ];
+
+    save();
+    render();
+  }
+
+  el.querySelectorAll(
+    '[data-u]'
+  ).forEach(b=>{
+    b.onclick=()=>
+      mv(
+        +b.dataset.u,
+        -1
+      );
+  });
+
+  el.querySelectorAll(
+    '[data-d]'
+  ).forEach(b=>{
+    b.onclick=()=>
+      mv(
+        +b.dataset.d,
+        1
+      );
+  });
+
+  const ag=
+    el.querySelector('#agree');
+
+  const ck=
+    el.querySelector('#check');
+
+  ag.onchange=()=>
+    ck.disabled=
+      !ag.checked;
+
+  ck.onclick=()=>{
+    if(
+      o.join('|')===
+      AEXPECT.join('|')
+    ){
+      fx('good');
+      go('auctionPay');
+    }
+    else{
+      fx('bad');
+
+      el.querySelector('#msg').innerHTML=`
+        <div class="narrator bad">
+          ❌ 각 권리의 취득시점과
+          종류를 다시 비교하세요.
+        </div>
+      `;
+    }
+  };
+};
+
+SC.auctionPay=el=>{
+  const next=
+    AEXPECT[S.auctionIndex];
+
+  el.innerHTML=
+    head(
+      'BOSS 2',
+      'AUCTION PAYOUT',
+      'PAY를 눌러 배당재원이 실제로 줄어드는 순서를 확인하세요.'
+    )
+    +
+    `
+    <div class="pot">
+
+      <div
+        class="tiny"
+        style="color:#c8c0d2"
+      >
+        남은 배당재원
+      </div>
+
+      <div class="big">
+        ${money(S.auctionPot)}
+      </div>
+
+    </div>
+
+    ${AEXPECT.map(id=>{
+      const m=
+        AMETA[id];
+
+      const p=
+        S.auctionPaid[id];
+
+      return `
+        <div
+          class="claim ${
+            p!==undefined
+            ? 'paid'
+            : ''
+          }"
+        >
+
+          <div>
+
+            <b>
+              ${m.name}
+            </b>
+
+            <span>
+              ${m.info}
+              <br>
+
+              요구
+              ${money(m.claim)}
+
+              ${
+                p!==undefined
+                ? ' · 실제 '+money(p)
+                : ''
+              }
+            </span>
+
+          </div>
+
+          <button
+            class="paybtn"
+            data-pay="${id}"
+            ${p!==undefined?'disabled':''}
+          >
+            PAY
+          </button>
+
+        </div>
+      `;
+    }).join('')}
+
+    ${
+      S.auctionIndex===
+      AEXPECT.length
+      ?
+      `
+      <div class="panel good pulse">
+
+        <div class="stat">
+          <span>PLAYER 보증금</span>
+          <b>${money(C.deposit)}</b>
+        </div>
+
+        <div class="stat">
+          <span>실제 배당</span>
+          <b>
+            ${money(S.auctionPaid.player||0)}
+          </b>
+        </div>
+
+        <div class="stat">
+          <span>회수율</span>
+          <b>
+            ${
+              (S.auctionPaid.player||0)===
+              C.deposit
+              ? '100%'
+              : '부분 회수'
+            }
+          </b>
+        </div>
+
+      </div>
+
+      <div class="narrator good">
+
+        <b>
+          같은 집.
+          같은 경매.
+          같은 보증금.
+        </b>
+        <br>
+
+        바뀐 것은
+        확정일자를 갖췄다는 점입니다.
+
+      </div>
+
+      <button
+        class="primary"
+        id="master"
+      >
+        우리가 B은행보다 먼저 받은 이유 확인
+      </button>
+      `
+      :
+      ''
+    }
+
+    <div id="msg"></div>
+  `;
+
+  el.querySelectorAll(
+    '[data-pay]'
+  ).forEach(b=>{
+    b.onclick=()=>{
+      const id=
+        b.dataset.pay;
+
+      if(id!==next){
+        fx('bad');
+
+        el.querySelector('#msg').innerHTML=`
+          <div class="narrator bad">
+            🚨 아직 이 사람 차례가 아닙니다.
+          </div>
+        `;
+
+        return;
+      }
+
+      const pay=
+        Math.min(
+          S.auctionPot,
+          AMETA[id].claim
+        );
+
+      S.auctionPaid[id]=pay;
+      S.auctionPot-=pay;
+      S.auctionIndex++;
+
+      save();
+
+      if(pay>0){
+        moneyFx(pay);
+      }
+
+      fx('good');
+      render();
+    };
+  });
+
+  const m=
+    el.querySelector('#master');
+
+  if(m){
+    m.onclick=()=>
+      concept(
+        '우선변제권',
+        '대항요건과 확정일자를 갖춘 PLAYER는 후순위 B은행보다 먼저 보증금을 배당받았습니다. 방금 직접 실행한 돈의 순서가 우선변제권의 효과입니다.',
+        ()=>rewindTo(
+          'termEvent',
+          ()=>setCP('term')
+        ),
+        'master'
+      );
+  }
+};
+
+/* 기간 */
+
+SC.termEvent=el=>{
+  eventBreak(el,{
+    mode:'notice',
+    time:'1 YEAR LATER',
+    icon:'📩',
+    label:'LANDLORD MESSAGE',
+    title:'“계약 끝났으니 나가주세요”',
+
+    alert:`
+      <div class="source">
+        집주인 문자
+      </div>
+
+      <b>
+        계약서에 1년이라고 썼으니
+        이번 주까지 퇴거 부탁드립니다.
+      </b>
+    `,
+
+    message:`
+      신혼집 생활 1년째.
+      갑자기 집주인에게서
+      퇴거 요구 문자가 왔습니다.
+    `,
+
+    question:
+      '“계약서에 1년이라고 적혀 있으면 정말 끝난 걸까?”',
+
+    button:
+      '계약서를 다시 확인한다',
+
+    next:
+      'term'
+  });
+};
+
+SC.term=el=>{
+  el.innerHTML=
+    head(
+      'ACT 4',
+      '계약서 공격',
+      '집주인의 퇴거 요구가 도착했습니다.'
+    )
+    +
+    npc(
+      '🧑‍💼',
+      '계약서에 1년이라고 썼잖아요. 이번 주에 나가주세요.'
+    )
+    +
+    `
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="pack"
+      >
+        📦 계약서가 1년이니
+        짐을 싼다
+      </button>
+
+      <button
+        class="choice"
+        data-v="claim"
+      >
+        📑 계약서를 들고
+        아직 살 권리가 있는지 주장한다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+      if(v==='claim'){
+        go('termOverride');
+      }
+      else{
+        retry(
+          el,
+          '❌ 계약서에 1년이라고 적혀 있다는 사실만으로 임대인이 임차인에게 반드시 1년 만에 나가라고 할 수 있는 것은 아닙니다.',
+          'term'
+        );
+      }
+    }
+  );
+};
+
+SC.termOverride=el=>{
+  fx('good');
+
+  el.innerHTML=
+    head(
+      'SYSTEM OVERRIDE',
+      '⚠ CONTRACT: 1 YEAR'
+    )
+    +
+    `
+    <div
+      class="panel dark pulse"
+      style="text-align:center"
+    >
+
+      <div
+        class="tiny"
+        style="color:#c8c0d2"
+      >
+        LAW PROTECTION
+      </div>
+
+      <div
+        style="
+          font:700 30px 'IBM Plex Mono';
+          color:#86f4b3;
+          margin-top:6px;
+        "
+      >
+        2 YEARS
+      </div>
+
+    </div>
+
+    <button
+      class="primary"
+      id="why"
+    >
+      왜 계약서보다 길게 보호되지?
+    </button>
+  `;
+
+  el.querySelector('#why').onclick=()=>
+    concept(
+      '2년 보호 규정',
+      '기간을 정하지 않거나 2년 미만으로 정한 주택임대차는 그 기간을 2년으로 봅니다. 다만 임차인은 스스로 2년 미만으로 정한 약정기간이 유효하다고 주장할 수 있습니다.',
+      ()=>go('renewEvent')
+    );
+};
+
+/* 갱신 */
+
+SC.renewEvent=el=>{
+  eventBreak(el,{
+    mode:'notice',
+    time:'계약 종료 6개월 전',
+    icon:'⏳',
+    label:'LEASE TIMELINE',
+    title:'이번에는 진짜 계약 종료가 다가온다',
+
+    alert:`
+      <div class="source">
+        계약 일정
+      </div>
+
+      <b>
+        임대차 종료 예정일이
+        가까워지고 있습니다.
+      </b>
+    `,
+
+    message:`
+      2년 보호기간이 끝나가는 시점.
+      두 사람은 이 집에
+      <b>계속 살고 싶습니다.</b>
+    `,
+
+    question:
+      '“계속 살고 싶다면 내가 먼저 할 수 있는 게 있을까?”',
+
+    button:
+      '가능한 선택을 확인한다',
+
+    next:
+      'renew'
+  });
+};
+
+SC.renew=el=>{
+  el.innerHTML=
+    head(
+      'ACT 5',
+      '계약 종료가 다가온다',
+      '계속 살고 싶은 신혼부부의 다음 선택입니다.'
+    )
+    +
+    npc(
+      '🧑‍💼',
+      '이제 진짜 2년 끝났으니 계약 종료입니다.'
+    )
+    +
+    `
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="leave"
+      >
+        계약 종료라고 하니
+        그대로 나간다
+      </button>
+
+      <button
+        class="choice"
+        data-v="renew"
+      >
+        🔍 계속 살고 싶다는
+        갱신요구를 한다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+      if(v==='renew'){
+        concept(
+          '계약갱신요구권',
+          '정당한 갱신거절 사유가 없는 경우 임차인은 계약갱신요구권을 <b>1회</b> 행사할 수 있고, 갱신되는 임대차의 존속기간은 <b>2년</b>으로 봅니다. 이제 임대인이 실제 거주를 이유로 거절할 수 있는지 확인합니다.',
+          ()=>go(
+            'ownerUseEvent',
+            ()=>setCP('ownerUse')
+          )
+        );
+      }
+      else{
+        retry(
+          el,
+          '❌ 정당한 갱신거절 사유가 없는 사건입니다. 임차인이 사용할 수 있는 갱신제도를 찾아보세요.',
+          'renew'
+        );
+      }
+    }
+  );
+};
+
+/* 실거주 */
+
+const EV={
+  job:[
+    '임대인의 직장이 해당 주택 근처로 이전',
+    'plus'
+  ],
+
+  old:[
+    '임대인의 현재 주택 임대차가 곧 종료',
+    'plus'
+  ],
+
+  moving:[
+    '이사업체 견적·전입 준비 자료',
+    'plus'
+  ],
+
+  ad:[
+    '갱신거절 직후 더 높은 보증금으로 새 임차인 광고',
+    'minus'
+  ],
+
+  msg:[
+    '“더 비싸게 받을 수 있는데 왜 계속 사냐”는 메시지',
+    'minus'
+  ],
+
+  contr:[
+    '실거주 예정 시기와 모순되는 행동이 반복',
+    'minus'
+  ]
+};
+
+SC.ownerUseEvent=el=>{
+  eventBreak(el,{
+    mode:'danger',
+    time:'갱신요구 3 DAYS LATER',
+    icon:'📨',
+    label:'LANDLORD RESPONSE',
+    title:'갱신요구에 답변이 왔다',
+
+    alert:`
+      <div class="source">
+        집주인 답변
+      </div>
+
+      <b>
+        갱신은 어렵습니다.
+        이번에는 제가 직접 들어가 살 예정입니다.
+      </b>
+    `,
+
+    message:`
+      계속 살겠다는 갱신요구를 보낸 뒤,
+      집주인이
+      <b>실거주</b>를 이유로
+      거절 의사를 밝혔습니다.
+    `,
+
+    question:
+      '“직접 산다고 말하면 그것만으로 끝나는 걸까?”',
+
+    button:
+      '집주인의 말을 확인한다',
+
+    next:
+      'ownerUse'
+  });
+};
+
+SC.ownerUse=el=>{
+  if(!S.ownerInvestigating){
+    el.innerHTML=
+      head(
+        'ACT 5-B',
+        '“제가 직접 살 겁니다”',
+        '임대인이 실제 거주를 이유로 갱신을 거절합니다.'
+      )
+      +
+      npc(
+        '🧑‍💼',
+        '제가 살 거니까 나가주세요. 제가 산다는데 뭘 더 확인해요?'
+      )
+      +
+      `
+      <div class="choices">
+
+        <button
+          class="choice"
+          data-v="leave"
+        >
+          실거주라고 했으니
+          바로 나간다
+        </button>
+
+        <button
+          class="choice"
+          data-v="check"
+        >
+          객관적인 사정을
+          조사해본다
+        </button>
+
+      </div>
+    `;
+
+    bind(
+      el,
+      v=>{
+        if(v==='check'){
+          go(
+            'ownerUse',
+            ()=>{
+              S.ownerInvestigating=true;
+            },
+            {skip:true}
+          );
+        }
+        else{
+          bad('BE04');
+        }
+      }
+    );
+
+    return;
+  }
+
+  const keys=
+    Object.keys(EV);
+
+  el.innerHTML=
+    head(
+      'ACT 5-B',
+      'ACTUAL RESIDENCE — 증거 수사',
+      '각 자료가 실거주 의사의 신빙성을 높이는지 낮추는지 분류하세요.'
+    )
+    +
+    keys.map(k=>`
+      <div class="evidence">
+
+        <b>
+          ${EV[k][0]}
+        </b>
+
+        <div class="evbtns">
+
+          <button
+            class="evbtn ${
+              S.ownerEvidence[k]==='plus'
+              ? 'on'
+              : ''
+            }"
+            data-k="${k}"
+            data-v="plus"
+          >
+            신빙성 ↑
+          </button>
+
+          <button
+            class="evbtn ${
+              S.ownerEvidence[k]==='minus'
+              ? 'on'
+              : ''
+            }"
+            data-k="${k}"
+            data-v="minus"
+          >
+            신빙성 ↓
+          </button>
+
+        </div>
+
+      </div>
+    `).join('')
+    +
+    `
+    <button
+      class="primary"
+      id="judge"
+      ${
+        keys.every(
+          k=>S.ownerEvidence[k]
+        )
+        ? ''
+        : 'disabled'
+      }
+    >
+      분류 제출
+    </button>
+
+    <div id="msg"></div>
+  `;
+
+  el.querySelectorAll(
+    '[data-k]'
+  ).forEach(b=>{
+    b.onclick=()=>{
+      S.ownerEvidence[
+        b.dataset.k
+      ]=
+        b.dataset.v;
+
+      save();
+      render();
+    };
+  });
+
+  el.querySelector('#judge').onclick=()=>{
+    const wrongs=
+      keys.filter(
+        k=>
+          S.ownerEvidence[k]!==
+          EV[k][1]
+      );
+
+    if(wrongs.length){
+      fx('bad');
+
+      el.querySelector('#msg').innerHTML=`
+        <div class="narrator bad">
+
+          ❌ ${wrongs.length}개를 다시 보세요.
+
+          이 분류는 수업용 단서 정리일 뿐,
+          실제 재판에서 개별 자료 하나가
+          자동 결론을 만드는 것은 아닙니다.
+
+        </div>
+      `;
+
+      return;
+    }
+
+    go('ownerUseFinal');
+  };
+};
+
+SC.ownerUseFinal=el=>{
+  el.innerHTML=
+    head(
+      'CASE FILE 2022다279795',
+      '한 자료만 맞으면 자동으로 결론?',
+      '마지막 판단입니다.'
+    )
+    +
+    `
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="one"
+      >
+        결정적 증거 하나만 있으면
+        자동으로 실거주 여부가 확정된다
+      </button>
+
+      <button
+        class="choice"
+        data-v="all"
+      >
+        여러 객관적 사정을 종합해
+        실제 거주의사의 진정성을 판단한다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+      if(v==='all'){
+        concept(
+          '실거주 갱신거절 · 종합판단',
+          '대법원 2022다279795은 실제 거주 사유의 <b>증명책임을 임대인</b>에게 두고, 주거·직장·학교 상황, 거주의사를 갖게 된 경위, 이사 준비, 모순되는 언동 등 여러 사정을 종합해 판단한다고 봅니다.',
+          ()=>go('renewAccepted')
+        );
+      }
+      else{
+        retry(
+          el,
+          '❌ 실제 거주의사는 임대인의 내심에 관한 장래 계획이므로 여러 사정을 종합해 판단합니다.',
+          'ownerUseFinal'
+        );
+      }
+    }
+  );
+};
+
+SC.renewAccepted=el=>{
+  fx('good');
+
+  el.innerHTML=
+    head(
+      'RENEWAL RESULT',
+      '✅ 이 사건에서는 갱신거절 사유가 인정되지 않았습니다',
+      '실거주 주장을 말 한마디만으로 확정하지 않고 객관적 사정을 확인한 결과입니다.'
+    )
+    +
+    `
+    <div class="panel good">
+
+      <div class="stat">
+        <span>계약갱신요구권</span>
+        <b>1회 사용</b>
+      </div>
+
+      <div class="stat">
+        <span>갱신 존속기간</span>
+        <b>2년</b>
+      </div>
+
+    </div>
+
+    <p class="tiny">
+      ※ 수업용 사건에서는
+      확인된 모순 정황 등을 바탕으로
+      실거주 사유가 인정되지 않는 것으로 설정합니다.
+
+      실제 분쟁은 구체적 사실관계에 따라 판단됩니다.
+    </p>
+
+    <button
+      class="primary"
+      id="next"
+    >
+      갱신 후 보증금 증액 미션
+    </button>
+  `;
+
+  el.querySelector('#next').onclick=
+    ()=>go('raiseEvent');
+};
+
+/* 증액 */
+
+SC.raiseEvent=el=>{
+  eventBreak(el,{
+    mode:'notice',
+    time:'갱신 계약 협의 중',
+    icon:'💸',
+    label:'NEW CONTRACT CONDITION',
+    title:'갱신은 됐는데, 보증금이 갑자기 뛴다',
+
+    alert:`
+      <div class="source">
+        집주인 새 조건
+      </div>
+
+      <b>
+        갱신 조건: 보증금 20% 인상
+      </b>
+    `,
+
+    message:`
+      실거주 갱신거절 문제가 정리되자
+      집주인이 이번에는
+      <b>보증금 증액</b>을 요구합니다.
+    `,
+
+    question:
+      '“20%를 일방적으로 올릴 수 있는 걸까?”',
+
+    button:
+      '증액 요구를 계산해본다',
+
+    next:
+      'raise'
+  });
+};
+
+SC.raise=el=>{
+  el.innerHTML=
+    head(
+      'ACT 6',
+      '“그럼 보증금 20% 올립니다”',
+      '법 제7조에 따른 증액청구 사유가 인정된다고 가정하고, 임대인이 일방적으로 청구할 수 있는 상한을 계산합니다.'
+    )
+    +
+    npc(
+      '🧑‍💼',
+      '보증금 20% 올립니다. 동의 안 하셔도 그렇게 할게요.'
+    )
+    +
+    `
+    <div class="calcbox">
+
+      <b>
+        현재 보증금
+        ${money(C.raiseBase)}
+      </b>
+
+      <div class="tiny">
+        법에 따른 증액청구 상한액을
+        숫자로 입력하세요.
+      </div>
+
+      <input
+        id="calc"
+        inputmode="numeric"
+        placeholder="예: 7500000"
+      >
+
+      <button
+        class="primary"
+        id="submit"
+      >
+        계산 제출
+      </button>
+
+    </div>
+
+    <div id="msg"></div>
+  `;
+
+  el.querySelector('#submit').onclick=()=>{
+    const raw=
+      el.querySelector('#calc')
+      .value
+      .replace(
+        /[^0-9]/g,
+        ''
+      );
+
+    const n=
+      Number(raw);
+
+    if(n===C.raiseCap){
+      fx('good');
+
+      concept(
+        '증액청구 상한',
+        `제7조에 따른 증액청구는 약정한 차임·보증금의 <b>20분의 1(5%)</b>을 초과하지 못합니다. 1억 5천만 원의 5%는 750만 원이므로, 이 사건의 상한선은 총 ${money(C.raiseTotal)}입니다.`,
+        ()=>go('raiseSixEvent')
+      );
+    }
+    else{
+      fx('bad');
+
+      el.querySelector('#msg').innerHTML=`
+        <div class="narrator bad">
+          ❌ 1억 5천만 원 × 5%를 다시 계산하세요.
+        </div>
+      `;
+    }
+  };
+};
+
+SC.raiseSixEvent=el=>{
+  eventBreak(el,{
+    mode:'danger',
+    time:'6 MONTHS LATER',
+    icon:'📩',
+    label:'ANOTHER INCREASE?',
+    title:'또 보증금을 올리겠다고?',
+
+    alert:`
+      <div class="source">
+        집주인 문자
+      </div>
+
+      <b>
+        물가가 올랐으니
+        이번에는 3% 더 인상하겠습니다.
+      </b>
+    `,
+
+    message:`
+      직전 증액 후 겨우 6개월.
+      다시 증액 요구가 도착했습니다.
+    `,
+
+    question:
+      '“상한만 지키면 몇 번이고 계속 올릴 수 있는 건가?”',
+
+    button:
+      '이번 요구가 가능한지 판단한다',
+
+    next:
+      'raiseSix'
+  });
+};
+
+SC.raiseSix=el=>{
+  el.innerHTML=
+    head(
+      'ACT 6-B',
+      '6개월 만의 재증액 요구'
+    )
+    +
+    npc(
+      '🧑‍💼',
+      '물가가 더 올랐으니까 이번에 3% 더 올릴게요.'
+    )
+    +
+    `
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="yes"
+      >
+        가능하다
+      </button>
+
+      <button
+        class="choice"
+        data-v="no"
+      >
+        아직은 다시 증액청구할 수 없다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+      if(v==='no'){
+        concept(
+          '증액청구 제한 · MASTERED',
+          '임대차계약 또는 약정한 차임·보증금의 증액이 있은 후 <b>1년 이내</b>에는 다시 증액청구하지 못합니다. 따라서 이번 6개월 후 재증액청구는 허용되지 않습니다.',
+          ()=>go(
+            'moveoutEvent',
+            ()=>setCP('moveout')
+          ),
+          'master'
+        );
+      }
+      else{
+        retry(
+          el,
+          '❌ 직전 증액 후 6개월밖에 지나지 않았습니다.',
+          'raiseSix'
+        );
+      }
+    }
+  );
+};
+
+/* FINAL BOSS */
+
+SC.moveoutEvent=el=>{
+  eventBreak(el,{
+    mode:'danger',
+    time:'갱신된 계약 종료 무렵',
+    icon:'📱',
+    label:'HR ALERT · D-7',
+    title:'7일 안에 다른 지역으로 이사해야 한다',
+
+    alert:`
+      <div class="source">
+        인사발령 알림
+      </div>
+
+      <b>
+        근무지 변경 · 7일 후 부임
+      </b>
+    `,
+
+    message:`
+      마침 임대차도 종료됩니다.
+      그런데 집주인은 아직
+      <b>
+        보증금 1억 5천만 원을
+        돌려주지 않았습니다.
+      </b>
+    `,
+
+    question:
+      '“나는 나가야 하는데… 돈은 안 준다고?”',
+
+    button:
+      '집주인에게 보증금 반환을 요구한다',
+
+    next:
+      'moveout'
+  });
+};
+
+SC.moveout=el=>{
+  if(!S.moveoutFound){
+    el.innerHTML=
+      head(
+        'FINAL BOSS',
+        '🚚 7 DAYS TO MOVE',
+        '갱신된 임대차의 종료일과 인사발령이 겹쳤습니다. 임대차는 끝났지만 보증금은 아직 못 받았습니다.'
+      )
+      +
+      npc(
+        '🧑‍💼',
+        '다음 세입자 들어오면 보증금 드릴게요. 일단 전출부터 하세요.'
+      )
+      +
+      `
+      <div class="choices">
+
+        <button
+          class="choice"
+          data-v="leave"
+        >
+          일단 이사·전출한다
+        </button>
+
+        <button
+          class="choice"
+          data-v="court"
+        >
+          🔍 법원에서 임차권을
+          등기해 두는 절차가 있는지 찾는다
+        </button>
+
+      </div>
+    `;
+
+    bind(
+      el,
+      v=>{
+        if(v==='court'){
+          concept(
+            '임차권등기명령 발견',
+            '임대차가 끝났는데 보증금이 반환되지 않은 경우 임차인은 관할 법원에 임차권등기명령을 신청할 수 있습니다. 이제 마지막 함정은 <b>신청과 등기 완료</b>의 차이입니다.',
+            ()=>go(
+              'applicationEvent',
+              ()=>{
+                S.moveoutFound=true;
+                S.leaseRegStep=0;
+              }
+            )
+          );
+        }
+        else{
+          bad('BE05');
+        }
+      }
+    );
+
+    return;
+  }
+
+  el.innerHTML=
+    head(
+      'FINAL BOSS',
+      'APPLICATION SENT',
+      '법원에 임차권등기명령을 신청했습니다. 이제?'
+    )
+    +
+    `
+    <div class="panel blue">
+
+      <div class="stat">
+        <span>신청서 접수</span>
+        <b>✅ 완료</b>
+      </div>
+
+      <div class="stat">
+        <span>임차권등기</span>
+        <b>⏳ 아직 확인 안 됨</b>
+      </div>
+
+    </div>
+
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="move"
+      >
+        신청했으니
+        바로 이사·전출
+      </button>
+
+      <button
+        class="choice"
+        data-v="check"
+      >
+        등기 상태를 확인한다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+      if(v==='move'){
+        bad('BE05');
+      }
+      else{
+        go(
+          'leaseRegProgress',
+          ()=>S.leaseRegStep=0
+        );
+      }
+    }
+  );
+};
+
+SC.applicationEvent=el=>{
+  eventBreak(el,{
+    mode:'notice',
+    icon:'⚖️',
+    label:'COURT APPLICATION',
+    title:'임차권등기명령을 신청했다',
+
+    alert:`
+      <div class="source">
+        법원 전자접수
+      </div>
+
+      <b>
+        신청서 접수 완료 · 사건번호 발급
+      </b>
+    `,
+
+    message:`
+      신청 버튼은 눌렀습니다.
+      하지만 아직 등기부에는
+      아무 변화가 확인되지 않습니다.
+    `,
+
+    question:
+      '“접수됐으니 이제 바로 이사해도 되는 걸까?”',
+
+    button:
+      '신청 후 상태를 확인한다',
+
+    next:
+      'moveout'
+  });
+};
+
+SC.leaseRegProgress=el=>{
+  const steps=[
+    '신청서 접수',
+    '법원 결정',
+    '등기 촉탁',
+    '임차권등기 완료'
+  ];
+
+  const step=
+    S.leaseRegStep;
+
+  el.innerHTML=
+    head(
+      'FINAL BOSS',
+      '임차권등기 진행 확인',
+      '“신청했다”가 아니라 실제 등기 완료까지 확인합니다.'
+    )
+    +
+    `
+    <div class="progress">
+
+      <div
+        style="
+          width:${
+            (step+1)/
+            steps.length*
+            100
+          }%
+        "
+      ></div>
+
+    </div>
+
+    <div class="panel">
+
+      ${steps.map((x,i)=>`
+        <div class="stat">
+
+          <span>
+            ${x}
+          </span>
+
+          <b>
+            ${
+              i<step
+              ? '✅'
+              :
+              i===step
+              ?
+                (
+                  step===3
+                  ? '✅'
+                  : '⏳'
+                )
+              :
+              '—'
+            }
+          </b>
+
+        </div>
+      `).join('')}
+
+    </div>
+
+    ${
+      step<3
+      ?
+      `
+      <button
+        class="primary"
+        id="next"
+      >
+        처리 상태 다시 확인
+      </button>
+      `
+      :
+      `
+      <div class="narrator good pulse">
+
+        <b>
+          ✅ 임차권등기 완료
+        </b>
+        <br>
+
+        이제 이사 후
+        주택의 점유와 주민등록을 잃더라도
+        이미 취득한 대항력·우선변제권은 유지됩니다.
+
+      </div>
+
+      <div class="shieldrow">
+
+        <div class="shield locked">
+
+          <div class="ico">
+            🛡️
+          </div>
+
+          대항력
+          <br>
+          LOCKED
+
+        </div>
+
+        <div class="shield locked">
+
+          <div class="ico">
+            💰
+          </div>
+
+          우선변제권
+          <br>
+          LOCKED
+
+        </div>
+
+        <div class="shield on">
+
+          <div class="ico">
+            📜
+          </div>
+
+          임차권등기
+          <br>
+          완료
+
+        </div>
+
+      </div>
+
+      ${
+        law(
+          '주택임대차보호법 제3조의3 제5항',
+          '임차권등기를 마치면 대항력과 우선변제권을 취득합니다. 이미 그 권리를 취득한 임차인은 임차권등기 이후 대항요건을 상실하더라도 기존 대항력·우선변제권을 잃지 않습니다.'
+        )
+      }
+
+      <button
+        class="primary"
+        id="move"
+      >
+        🚚 MOVE OUT
+      </button>
+      `
+    }
+  `;
+
+  const n=
+    el.querySelector('#next');
+
+  if(n){
+    n.onclick=()=>{
+      S.leaseRegStep++;
+
+      save();
+
+      fx('good');
+
+      render();
+    };
+  }
+
+  const m=
+    el.querySelector('#move');
+
+  if(m){
+    m.onclick=()=>
+      concept(
+        '임차권등기 완료 후 권리 보전',
+        'FINAL BOSS CLEAR. 보증금을 돌려받지 못한 채 이사해야 할 때는 신청 자체가 아니라 임차권등기의 완료를 확인하는 것이 핵심입니다.',
+        ()=>go(
+          'clear',
+          ()=>S.protected=C.deposit
+        ),
+        'master'
+      );
+  }
+};
+
+/* CLEAR */
+
+SC.clear=el=>{
+  confettiBurst();
+
+  const loss=
+    Object.values(
+      S.lossLedger
+    )
+    .reduce(
+      (a,b)=>a+b,
+      0
+    );
+
+  el.innerHTML=`
+    <div class="clear">
+
+      <div class="cup">
+        🏆
+      </div>
+
+      <div class="eyebrow">
+        CASE 02 CLOSED
+      </div>
+
+      <h1>
+        DEPOSIT SURVIVED
+      </h1>
+
+      <p class="sub">
+        법률용어를 먼저 외운 것이 아니라,
+        사건에서 필요성을 발견하고
+        같은 공격을 다시 막아냈습니다.
+      </p>
+
+    </div>
+
+    <div class="moneycard gain">
+
+      <div class="label">
+        보존한 보증금
+      </div>
+
+      <div class="amt">
+        ${money(S.protected||C.deposit)}
+        /
+        ${money(C.deposit)}
+      </div>
+
+    </div>
+
+    <div class="stat">
+      <span>발견한 RED FLAG</span>
+      <b>${S.flags.length}</b>
+    </div>
+
+    <div class="stat">
+      <span>실제 경험한 BAD END</span>
+      <b>${S.badEnds.length}</b>
+    </div>
+
+    <div class="stat">
+      <span>환생 횟수</span>
+      <b>${S.reincarnations}</b>
+    </div>
+
+    <div class="stat">
+      <span>실패세계 손실 합계</span>
+      <b>${money(loss)}</b>
+    </div>
+
+    <div class="conceptbox">
+
+      <b>
+        📚 오늘의 법률도감
+      </b>
+
+      <br>
+
+      ${S.concepts.join(' · ')}
+
+    </div>
+
+    <div
+      class="panel dark"
+      style="text-align:center"
+    >
+
+      <b>
+        계약서를 썼기 때문에 살아남은 것이 아니다.
+      </b>
+
+      <p
+        class="tiny"
+        style="color:#ddd"
+      >
+        계약 전에는 위험을 찾고,
+        <br>
+
+        계약 후에는 권리를 만들고,
+        <br>
+
+        이사할 때는 그 권리를 보존했기 때문에 살아남았다.
+      </p>
+
+    </div>
+
+    <button
+      class="primary"
+      id="again"
+    >
+      처음부터 다시 플레이
+    </button>
+  `;
+
+  el.querySelector('#again').onclick=
+    resetAll;
+};
+
+/* BAD END */
+
+SC.badend=el=>{
+  const b=
+    BAD[S.activeBad];
+
+  el.innerHTML=`
+    <section class="badend">
+
+      <div class="skull">
+        ☠
+      </div>
+
+      <div
+        class="eyebrow"
+        style="color:#ffb0b5"
+      >
+        BAD END · ${S.activeBad}
+      </div>
+
+      <h1>
+        「${b.title}」
+      </h1>
+
+      <div
+        class="moneycard loss"
+        style="text-align:left"
+      >
+
+        <div class="label">
+          실패세계의 게임상 손실
+        </div>
+
+        <div class="amt">
+          - ${money(b.loss)}
+        </div>
+
+      </div>
+
+      <p>
+        ${b.story}
+      </p>
+
+      <div
+        class="tiny"
+        style="color:#cabfd0"
+      >
+        손실액은 수업용 사건 설정값이며
+        실제 법정 손해액이나
+        실제 경매 배당액으로 일반화할 수 없습니다.
+      </div>
+
+      <button
+        class="retry"
+        id="re"
+      >
+        ♻ 원인 하나 배웠다 — 체크포인트로 환생
+      </button>
+
+    </section>
+  `;
+
+  el.querySelector('#re').onclick=
+    reincarnate;
+};
+
+function render(){
+  renderHUD();
+
+  const el=
+    document.getElementById('stage');
+
+  (
+    SC[S.scene]
+    ||
+    SC.cast
+  )(el);
+}
+
+render();
+
+</script>
+</body>
+</html>

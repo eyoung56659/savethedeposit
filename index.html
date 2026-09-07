@@ -1,0 +1,893 @@
+/* ---------- 우선변제권 발견 ---------- */
+
+SC.confirmedChoice=el=>{
+
+  el.innerHTML=
+    head(
+      'ACT 3',
+      '주민센터 직원의 한마디',
+      '대항력으로 새 소유자에게 임대차를 주장할 수 있다는 것은 알게 됐습니다.'
+    )
+    +
+    npc(
+      '👩‍💼',
+      '계약서에 확정일자도 받아두실래요?'
+    )
+    +
+    `
+    <div class="choices">
+
+      <button
+        class="choice"
+        data-v="skip"
+      >
+        전입신고 했으니 됐죠.
+        그냥 간다
+      </button>
+
+      <button
+        class="choice"
+        data-v="get"
+      >
+        무슨 차이인지 아직 모르지만
+        받아둔다
+      </button>
+
+    </div>
+  `;
+
+  bind(
+    el,
+    v=>{
+
+      if(v==='skip'){
+
+        // 실제로 확정일자를 안 받은 세계 → 진짜 BAD END 가능
+        startFailAuction('bad');
+
+      }
+      else{
+
+        // 실제 선택은 성공.
+        // 먼저 성공 사실을 명확하게 보여준 뒤
+        // "안 받았던 평행세계"를 비교 체험한다.
+        go(
+          'fixedAcceptedEvent',
+          ()=>{
+
+            S.fixed=true;
+
+            save();
+
+          }
+        );
+
+      }
+    }
+  );
+};
+
+
+function startFailAuction(mode){
+
+  go(
+    'auctionFailEvent',
+    ()=>{
+
+      S.failMode=mode;
+
+      S.failPot=
+        C.auction.sale-
+        C.auction.cost;
+
+      S.failStep=0;
+
+      S.failPaid={};
+
+    }
+  );
+}
+
+
+/* ==========================================================
+   확정일자를 실제로 받은 세계
+   ========================================================== */
+
+SC.fixedAcceptedEvent=el=>{
+
+  eventBreak(
+    el,
+    {
+
+      mode:'good',
+
+      icon:'📅',
+
+      label:'YOUR TIMELINE · DATE STAMPED',
+
+      title:'확정일자를 받았다',
+
+      alert:`
+        <div class="source">
+          임대차계약서
+        </div>
+
+        <b>
+          확정일자 부여 완료 · 2026.03.02
+        </b>
+      `,
+
+      message:`
+        좋은 선택입니다.
+
+        <b>
+          실제 진행 중인 세계에서는
+          확정일자를 확보했습니다.
+        </b>
+
+        <br><br>
+
+        그런데 아직
+        이 날짜가 왜 중요한지는 모릅니다.
+
+        잠깐,
+        <b>
+          이 선택을 하지 않았던 미래
+        </b>
+        를 비교해봅니다.
+      `,
+
+      question:
+        '“확정일자가 없었으면 같은 경매에서 내 보증금은 어떻게 됐을까?”',
+
+      badge:
+        '✅ 실제 선택: 확정일자 받음 · 아래는 학습용 평행세계',
+
+      button:
+        '🪞 확정일자를 안 받은 미래 보기',
+
+      onNext:()=>{
+
+        startFailAuction(
+          'parallel'
+        );
+
+      }
+
+    }
+  );
+};
+
+
+/* ==========================================================
+   확정일자가 없는 세계에서 경매 사건 발생
+   ========================================================== */
+
+SC.auctionFailEvent=el=>{
+
+  const parallel=
+    S.failMode==='parallel';
+
+  eventBreak(
+    el,
+    {
+
+      mode:'danger',
+
+      time:'8 MONTHS LATER',
+
+      icon:
+        parallel
+        ? '🪞'
+        : '🔔',
+
+      label:
+        parallel
+        ? 'PARALLEL FUTURE · NO DATE STAMP'
+        : 'COURT NOTICE',
+
+      title:
+        parallel
+        ? '확정일자를 안 받은 세계의 경매'
+        : '우리 신혼집이 경매에 넘어갔다',
+
+      alert:
+        parallel
+        ?
+        `
+        <div class="source">
+          현재 보고 있는 세계
+        </div>
+
+        <b>
+          ⚠ 실제 선택과 다른 가상 미래 · 확정일자 없음
+        </b>
+        `
+        :
+        `
+        <div class="source">
+          서울○○지방법원 · 전자문서
+        </div>
+
+        <b>
+          부동산 임의경매개시결정
+        </b>
+        `,
+
+      message:
+        parallel
+        ?
+        `
+        실제 PLAYER는
+        <b>확정일자를 받았습니다.</b>
+
+        지금부터는
+
+        <b>
+          “만약 확정일자를 받지 않았더라면?”
+        </b>
+
+        이라는 평행세계입니다.
+
+        <br><br>
+
+        A은행의 담보권 실행으로
+        집이 경매에 들어갑니다.
+        `
+        :
+        `
+        평소처럼 살고 있던 어느 날,
+        법원 전자문서가 도착했습니다.
+
+        <b>
+          A은행이 담보권을 실행해
+          집이 경매절차에 들어갔습니다.
+        </b>
+        `,
+
+      question:
+        parallel
+        ?
+        '“확정일자 하나가 정말 돈 받을 순서를 바꿀까?”'
+        :
+        '“대항력도 있는데… 내 1억 5천은 안전한 거 아니었어?”',
+
+      badge:
+        parallel
+        ?
+        '🪞 PARALLEL SIMULATION · BAD END 통계에 기록되지 않음'
+        :
+        '',
+
+      button:
+        '배당표를 확인한다',
+
+      next:
+        'auctionFail'
+
+    }
+  );
+};
+
+
+/* ==========================================================
+   확정일자가 없는 경매 배당
+   ========================================================== */
+
+SC.auctionFail=el=>{
+
+  const steps=[
+    'bankA',
+    'bankB'
+  ];
+
+  const next=
+    steps[S.failStep];
+
+  const meta={
+
+    bankA:{
+
+      name:'🏦 A은행',
+
+      claim:
+        C.auction.bankA,
+
+      info:
+        '근저당권 · 02.01 · 이 사건 배당채권액 1억'
+
+    },
+
+    bankB:{
+
+      name:'🏦 B은행',
+
+      claim:
+        C.auction.bankB,
+
+      info:
+        '저당권 · 04.01'
+
+    },
+
+    player:{
+
+      name:'💍 PLAYER',
+
+      claim:
+        C.auction.player,
+
+      info:
+        '입주·전입 03.02 / 대항력 03.03 / 확정일자 없음'
+
+    }
+
+  };
+
+
+  el.innerHTML=
+
+    head(
+
+      S.failMode==='parallel'
+      ?
+      '🪞 PARALLEL FUTURE · 확정일자 없음'
+      :
+      '⏩ 8 MONTHS LATER',
+
+      '🚨 COURT NOTICE — 임의경매개시',
+
+      S.failMode==='parallel'
+      ?
+      '실제 PLAYER는 확정일자를 받았습니다. 지금은 비교를 위한 가상세계입니다.'
+      :
+      '대항력은 있는데, 이번 문제는 “경매대금에서 누가 먼저 돈을 받는가”입니다.'
+
+    )
+    +
+    `
+    <div class="panel dark">
+
+      <div class="stat">
+
+        <span>
+          매각대금
+        </span>
+
+        <b>
+          ${money(C.auction.sale)}
+        </b>
+
+      </div>
+
+
+      <div class="stat">
+
+        <span>
+          집행비용
+        </span>
+
+        <b>
+          - ${money(C.auction.cost)}
+        </b>
+
+      </div>
+
+
+      <div class="stat">
+
+        <span>
+          배당재원
+        </span>
+
+        <b>
+          ${
+            money(
+              C.auction.sale-
+              C.auction.cost
+            )
+          }
+        </b>
+
+      </div>
+
+    </div>
+
+
+    <div class="pot">
+
+      <div
+        class="tiny"
+        style="color:#c8c0d2"
+      >
+        남은 배당재원
+      </div>
+
+      <div class="big">
+        ${money(S.failPot)}
+      </div>
+
+    </div>
+
+
+    ${
+      [
+        'bankA',
+        'bankB',
+        'player'
+      ]
+      .map(
+        id=>{
+
+          const m=
+            meta[id];
+
+          const p=
+            S.failPaid[id];
+
+          return `
+            <div
+              class="
+                claim
+                ${p!==undefined?'paid':''}
+                ${
+                  id==='player' &&
+                  S.failStep>=2
+                  ?
+                  'zero'
+                  :
+                  ''
+                }
+              "
+            >
+
+              <div>
+
+                <b>
+                  ${m.name}
+                </b>
+
+                <span>
+
+                  ${m.info}
+
+                  <br>
+
+                  요구
+                  ${money(m.claim)}
+
+                  ${
+                    p!==undefined
+                    ?
+                    ' · 실제 '+money(p)
+                    :
+                    ''
+                  }
+
+                </span>
+
+              </div>
+
+
+              ${
+                id!=='player'
+                ?
+                `
+                <button
+                  class="paybtn"
+                  data-pay="${id}"
+                  ${p!==undefined?'disabled':''}
+                >
+                  PAY
+                </button>
+                `
+                :
+                `
+                <button
+                  class="paybtn"
+                  disabled
+                >
+                  ${
+                    S.failStep>=2
+                    ?
+                    '₩0'
+                    :
+                    'WAIT'
+                  }
+                </button>
+                `
+              }
+
+            </div>
+          `;
+
+        }
+      )
+      .join('')
+    }
+
+
+    ${
+      S.failStep>=2
+      ?
+      `
+
+      ${
+        S.failMode==='parallel'
+        ?
+        `
+        <div class="panel warn">
+
+          <b>
+            🪞 평행세계 결과
+          </b>
+
+
+          <div class="stat">
+
+            <span>
+              PLAYER 실제 선택
+            </span>
+
+            <b>
+              확정일자 받음 ✅
+            </b>
+
+          </div>
+
+
+          <div class="stat">
+
+            <span>
+              지금 보는 가상세계
+            </span>
+
+            <b>
+              확정일자 없음 ❌
+            </b>
+
+          </div>
+
+
+          <div class="stat">
+
+            <span>
+              PLAYER 회수액
+            </span>
+
+            <b>
+              ${money(0)}
+            </b>
+
+          </div>
+
+        </div>
+        `
+        :
+        ''
+      }
+
+
+      <div class="narrator bad pulse">
+
+        <b>
+          잠깐.
+        </b>
+
+        <br>
+
+        B은행은 우리보다 나중에
+        권리를 취득했는데
+
+        왜 PLAYER보다
+        먼저 돈을 받았지?
+
+      </div>
+
+
+      <button
+        class="primary"
+        id="why"
+      >
+        이 차이를 만든 조건을 찾는다
+      </button>
+
+      `
+      :
+      ''
+    }
+
+
+    <p class="tiny">
+
+      ※ 학습용 사건:
+
+      조세·임금채권·
+      소액임차인 최우선변제 등
+      다른 특수우선권은 없고,
+
+      PLAYER는 확정일자가 없어
+      주택임대차보호법 제3조의2 제2항의
+      우선변제권을 갖추지 못한 상태라고
+      가정합니다.
+
+    </p>
+
+
+    <div id="msg"></div>
+  `;
+
+
+  el.querySelectorAll(
+    '[data-pay]'
+  )
+  .forEach(
+    b=>{
+
+      b.onclick=()=>{
+
+        const id=
+          b.dataset.pay;
+
+
+        if(id!==next){
+
+          fx('bad');
+
+          el.querySelector(
+            '#msg'
+          ).innerHTML=`
+            <div class="narrator bad">
+              🚨 아직 이 담보권자의 차례가 아닙니다.
+            </div>
+          `;
+
+          return;
+
+        }
+
+
+        const claim=
+          meta[id].claim;
+
+
+        const pay=
+          Math.min(
+            S.failPot,
+            claim
+          );
+
+
+        S.failPaid[id]=pay;
+
+        S.failPot-=pay;
+
+        S.failStep++;
+
+
+        save();
+
+        moneyFx(pay);
+
+        fx('bad');
+
+        render();
+
+      };
+
+    }
+  );
+
+
+  const w=
+    el.querySelector('#why');
+
+
+  if(w){
+
+    w.onclick=()=>{
+
+      concept(
+
+        '우선변제권',
+
+        `
+        대항요건을 갖추고
+        임대차계약증서에
+        <b>확정일자</b>를 갖춘 임차인은
+
+        경매·공매의 환가대금에서
+        후순위권리자나
+        그 밖의 채권자보다
+
+        <b>
+          우선하여 보증금을 변제받을 수 있습니다.
+        </b>
+
+        방금 세계의 PLAYER에게는
+        그 추가 요건이 없었습니다.
+        `,
+
+        ()=>{
+
+          S.noFixedLessonSeen=true;
+
+          save();
+
+
+          if(
+            S.failMode==='bad'
+          ){
+
+            // 실제로 안 받았던 학생
+            bad('BE03');
+
+          }
+          else{
+
+            // 정답을 골랐던 학생:
+            // 평행세계만 보고 실제 세계로 복귀
+            rewindTo(
+              'fixedReady',
+              ()=>{
+
+                S.fixed=true;
+
+                S.priority=true;
+
+              }
+            );
+
+          }
+
+        }
+
+      );
+
+    };
+
+  }
+
+};
+
+
+/* ==========================================================
+   평행세계에서 돌아온 실제 세계
+   ========================================================== */
+
+SC.fixedReady=el=>{
+
+  S.fixed=true;
+
+  save();
+
+
+  el.innerHTML=
+
+    head(
+      'ACT 3',
+      '📅 실제 세계로 복귀',
+      '아까 본 0원 배당은 확정일자를 받지 않았던 평행세계였습니다.'
+    )
+    +
+    `
+    <div class="shieldrow">
+
+      <div class="shield on">
+
+        <div class="ico">
+          🔑
+        </div>
+
+        입주
+
+      </div>
+
+
+      <div class="shield on">
+
+        <div class="ico">
+          📍
+        </div>
+
+        주민등록
+
+      </div>
+
+
+      <div class="shield on pulse">
+
+        <div class="ico">
+          📅
+        </div>
+
+        확정일자
+
+      </div>
+
+    </div>
+
+
+    <div class="panel good">
+
+      <b>
+        ✅ YOUR REAL TIMELINE
+      </b>
+
+      <p class="tiny">
+
+        실제 PLAYER는
+        확정일자를 받아두었습니다.
+
+        이제
+        <b>
+          동일한 경매
+        </b>
+        를 실제 세계에서 다시 실행해
+        돈 받을 순서를 비교합니다.
+
+      </p>
+
+    </div>
+
+
+    <div class="narrator good">
+
+      <b>
+        같은 집.
+        같은 경매.
+        같은 은행.
+      </b>
+
+      <br>
+
+      이번에는 딱 하나,
+
+      <b>
+        확정일자가 있습니다.
+      </b>
+
+    </div>
+
+
+    <button
+      class="primary"
+      id="go"
+    >
+      같은 경매 다시 실행
+    </button>
+  `;
+
+
+  el.querySelector('#go').onclick=()=>{
+
+    go(
+      'auctionSuccessEvent',
+      ()=>{
+
+        S.priority=true;
+
+        S.auctionOrder=[
+          'player',
+          'bankB',
+          'bankA'
+        ];
+
+        S.auctionPot=
+          C.auction.sale-
+          C.auction.cost;
+
+        S.auctionPaid={};
+
+        S.auctionIndex=0;
+
+        setCP(
+          'auctionRank'
+        );
+
+      }
+    );
+
+  };
+
+};
